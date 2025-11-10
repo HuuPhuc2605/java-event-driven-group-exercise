@@ -2,15 +2,17 @@ package iuh.fit.se.nhom10.view;
 
 import iuh.fit.se.nhom10.model.TaiKhoanNhanVien;
 import iuh.fit.se.nhom10.service.TaiKhoanNhanVienService;
+import iuh.fit.se.nhom10.util.ButtonStyle;
+import iuh.fit.se.nhom10.util.ColorPalette;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.sql.SQLException;
 
 /**
- * Form đăng nhập admin - Giao diện cải thiện
+ * Form đăng nhập admin - Thiết kế chuyên nghiệp
  */
 public class FrmDangNhap extends JFrame {
     private JTextField txtTenDangNhap;
@@ -29,143 +31,127 @@ public class FrmDangNhap extends JFrame {
     }
 
     /**
-     * Thiết lập giao diện cải thiện
+     * Thiết lập giao diện chuyên nghiệp
      */
     private void setupUI() {
         setTitle("Đăng Nhập Hệ Thống Quản Lý Rạp Phim");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(600, 500);
+        setSize(600, 550);
         setLocationRelativeTo(null);
         setResizable(false);
+        setBackground(ColorPalette.BACKGROUND_MAIN);
 
         // Panel chính
         JPanel pnlMain = new JPanel();
         pnlMain.setLayout(new BorderLayout(0, 0));
-        pnlMain.setBackground(new Color(240, 240, 240));
+        pnlMain.setBackground(ColorPalette.BACKGROUND_MAIN);
 
-        // Header với gradient effect
         JPanel pnlHeader = new JPanel() {
             @Override
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 Graphics2D g2d = (Graphics2D) g;
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                GradientPaint gradient = new GradientPaint(0, 0, new Color(25, 55, 115), 0, getHeight(), new Color(15, 35, 75));
+                GradientPaint gradient = new GradientPaint(0, 0, ColorPalette.HEADER_GRADIENT_TOP, 0, getHeight(), ColorPalette.HEADER_GRADIENT_BOTTOM);
                 g2d.setPaint(gradient);
                 g2d.fillRect(0, 0, getWidth(), getHeight());
             }
         };
-        pnlHeader.setPreferredSize(new Dimension(600, 100));
+        pnlHeader.setPreferredSize(new Dimension(600, 120));
         
         JLabel lblTitle = new JLabel("ĐĂNG NHẬP HỆ THỐNG");
-        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        lblTitle.setForeground(Color.WHITE);
+        lblTitle.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_TITLE, Font.BOLD));
+        lblTitle.setForeground(ColorPalette.TEXT_HEADER_TITLE);
         lblTitle.setHorizontalAlignment(JLabel.CENTER);
         
         JLabel lblSubtitle = new JLabel("Quản Lý Rạp Chiếu Phim");
-        lblSubtitle.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        lblSubtitle.setForeground(new Color(200, 200, 200));
+        lblSubtitle.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_SUBTITLE, Font.PLAIN));
+        lblSubtitle.setForeground(ColorPalette.TEXT_HEADER_SUBTITLE);
         lblSubtitle.setHorizontalAlignment(JLabel.CENTER);
         
         pnlHeader.setLayout(new BoxLayout(pnlHeader, BoxLayout.Y_AXIS));
-        pnlHeader.add(Box.createVerticalStrut(15));
+        pnlHeader.add(Box.createVerticalStrut(20));
         lblTitle.setAlignmentX(Component.CENTER_ALIGNMENT);
         pnlHeader.add(lblTitle);
+        pnlHeader.add(Box.createVerticalStrut(5));
         lblSubtitle.setAlignmentX(Component.CENTER_ALIGNMENT);
         pnlHeader.add(lblSubtitle);
-        pnlHeader.add(Box.createVerticalStrut(10));
+        pnlHeader.add(Box.createVerticalStrut(15));
 
         // Panel nội dung
         JPanel pnlContent = new JPanel();
         pnlContent.setLayout(new BoxLayout(pnlContent, BoxLayout.Y_AXIS));
-        pnlContent.setBackground(Color.WHITE);
-        pnlContent.setBorder(BorderFactory.createEmptyBorder(40, 50, 40, 50));
+        pnlContent.setBackground(ColorPalette.BACKGROUND_CONTENT);
+        pnlContent.setBorder(BorderFactory.createEmptyBorder(50, 60, 50, 60));
 
-        // Label và TextField cho Tên đăng nhập
         JLabel lblUsername = new JLabel("Tên đăng nhập:");
-        lblUsername.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lblUsername.setForeground(new Color(50, 50, 50));
+        lblUsername.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL, Font.BOLD));
+        lblUsername.setForeground(ColorPalette.TEXT_LABEL);
         lblUsername.setAlignmentX(Component.LEFT_ALIGNMENT);
         
-        txtTenDangNhap = new JTextField();
-        txtTenDangNhap.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        txtTenDangNhap.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
-            BorderFactory.createEmptyBorder(8, 10, 8, 10)
-        ));
-        txtTenDangNhap.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        txtTenDangNhap.setBackground(new Color(250, 250, 250));
+        txtTenDangNhap = createStyledTextField();
         txtTenDangNhap.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // Label và PasswordField cho Mật khẩu
         JLabel lblPassword = new JLabel("Mật khẩu:");
-        lblPassword.setFont(new Font("Segoe UI", Font.BOLD, 12));
-        lblPassword.setForeground(new Color(50, 50, 50));
+        lblPassword.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL, Font.BOLD));
+        lblPassword.setForeground(ColorPalette.TEXT_LABEL);
         lblPassword.setAlignmentX(Component.LEFT_ALIGNMENT);
         
         txtMatKhau = new JPasswordField();
-        txtMatKhau.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        txtMatKhau.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_INPUT, Font.PLAIN));
         txtMatKhau.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
-            BorderFactory.createEmptyBorder(8, 10, 8, 10)
+            BorderFactory.createLineBorder(ColorPalette.BORDER_INPUT, 2),
+            BorderFactory.createEmptyBorder(10, 12, 10, 12)
         ));
-        txtMatKhau.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        txtMatKhau.setBackground(new Color(250, 250, 250));
+        txtMatKhau.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
+        txtMatKhau.setBackground(ColorPalette.BACKGROUND_INPUT);
+        txtMatKhau.setForeground(ColorPalette.TEXT_BODY);
+        txtMatKhau.setCaretColor(ColorPalette.TEXT_BODY);
         txtMatKhau.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        addFocusBorderListener(txtMatKhau);
 
-        // Checkbox ghi nhớ
         chkGhiNho = new JCheckBox("Ghi nhớ mật khẩu");
-        chkGhiNho.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        chkGhiNho.setBackground(Color.WHITE);
+        chkGhiNho.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_SMALL, Font.PLAIN));
+        chkGhiNho.setBackground(ColorPalette.BACKGROUND_CONTENT);
+        chkGhiNho.setForeground(ColorPalette.TEXT_BODY);
+        chkGhiNho.setFocusPainted(false);
         chkGhiNho.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        // Label thông báo
         lblThongBao = new JLabel();
-        lblThongBao.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblThongBao.setForeground(Color.RED);
+        lblThongBao.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_SMALL, Font.PLAIN));
+        lblThongBao.setForeground(ColorPalette.STATUS_ERROR);
         lblThongBao.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         // Thêm các component vào panel
         pnlContent.add(lblUsername);
-        pnlContent.add(Box.createVerticalStrut(5));
+        pnlContent.add(Box.createVerticalStrut(8));
         pnlContent.add(txtTenDangNhap);
-        pnlContent.add(Box.createVerticalStrut(20));
+        pnlContent.add(Box.createVerticalStrut(25));
         pnlContent.add(lblPassword);
-        pnlContent.add(Box.createVerticalStrut(5));
+        pnlContent.add(Box.createVerticalStrut(8));
         pnlContent.add(txtMatKhau);
         pnlContent.add(Box.createVerticalStrut(15));
         pnlContent.add(chkGhiNho);
-        pnlContent.add(Box.createVerticalStrut(10));
+        pnlContent.add(Box.createVerticalStrut(12));
         pnlContent.add(lblThongBao);
-        pnlContent.add(Box.createVerticalStrut(20));
+        pnlContent.add(Box.createVerticalStrut(25));
 
-        // Panel button
         JPanel pnlButtons = new JPanel();
         pnlButtons.setLayout(new BoxLayout(pnlButtons, BoxLayout.X_AXIS));
-        pnlButtons.setBackground(Color.WHITE);
+        pnlButtons.setBackground(ColorPalette.BACKGROUND_CONTENT);
+        pnlButtons.setAlignmentX(Component.LEFT_ALIGNMENT);
         
         btnDangNhap = new JButton("Đăng Nhập");
-        btnDangNhap.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btnDangNhap.setBackground(new Color(25, 100, 200));
-        btnDangNhap.setForeground(Color.WHITE);
-        btnDangNhap.setFocusPainted(false);
-        btnDangNhap.setPreferredSize(new Dimension(130, 40));
-        btnDangNhap.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnDangNhap.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
+        ButtonStyle.stylePrimaryButton(btnDangNhap);
         btnDangNhap.addActionListener(e -> handleLogin());
 
         btnThoat = new JButton("Thoát");
-        btnThoat.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btnThoat.setBackground(new Color(150, 150, 150));
-        btnThoat.setForeground(Color.WHITE);
-        btnThoat.setFocusPainted(false);
-        btnThoat.setPreferredSize(new Dimension(130, 40));
-        btnThoat.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnThoat.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
+        ButtonStyle.styleSecondaryButton(btnThoat);
         btnThoat.addActionListener(e -> handleExit());
 
         pnlButtons.add(btnDangNhap);
-        pnlButtons.add(Box.createHorizontalStrut(20));
+        pnlButtons.add(Box.createHorizontalStrut(15));
         pnlButtons.add(btnThoat);
         
         pnlContent.add(pnlButtons);
@@ -178,6 +164,48 @@ public class FrmDangNhap extends JFrame {
 
         // Gán sự kiện
         attachEvents();
+    }
+
+    /**
+     * Tạo TextField với styling chuyên nghiệp
+     */
+    private JTextField createStyledTextField() {
+        JTextField txt = new JTextField();
+        txt.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_INPUT, Font.PLAIN));
+        txt.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(ColorPalette.BORDER_INPUT, 2),
+            BorderFactory.createEmptyBorder(10, 12, 10, 12)
+        ));
+        txt.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
+        txt.setBackground(ColorPalette.BACKGROUND_INPUT);
+        txt.setForeground(ColorPalette.TEXT_BODY);
+        txt.setCaretColor(ColorPalette.TEXT_BODY);
+        
+        addFocusBorderListener(txt);
+        return txt;
+    }
+    
+    /**
+     * Thêm focus border listener để hiệu ứng focus
+     */
+    private void addFocusBorderListener(JTextField txt) {
+        txt.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                txt.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(ColorPalette.BORDER_FOCUS, 2),
+                    BorderFactory.createEmptyBorder(10, 12, 10, 12)
+                ));
+            }
+            
+            @Override
+            public void focusLost(FocusEvent e) {
+                txt.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(ColorPalette.BORDER_INPUT, 2),
+                    BorderFactory.createEmptyBorder(10, 12, 10, 12)
+                ));
+            }
+        });
     }
 
     /**
@@ -201,7 +229,7 @@ public class FrmDangNhap extends JFrame {
         // Kiểm tra input
         if (tenDangNhap.isEmpty() || matKhau.isEmpty()) {
             lblThongBao.setText("Vui lòng nhập tên đăng nhập và mật khẩu!");
-            lblThongBao.setForeground(new Color(200, 0, 0));
+            lblThongBao.setForeground(ColorPalette.STATUS_ERROR);
             return;
         }
 
@@ -210,8 +238,8 @@ public class FrmDangNhap extends JFrame {
 
         if (adminHienTai != null) {
             // Đăng nhập thành công
-            lblThongBao.setText("Đăng nhập thành công! Chào " + adminHienTai.getNhanVien().getTenNV());
-            lblThongBao.setForeground(new Color(0, 150, 0));
+            lblThongBao.setText("✓ Đăng nhập thành công! Chào " + adminHienTai.getNhanVien().getTenNV());
+            lblThongBao.setForeground(ColorPalette.STATUS_SUCCESS);
             
             // Delay một chút rồi mở form chính
             Timer timer = new Timer(1500, e -> openMainForm());
@@ -219,8 +247,8 @@ public class FrmDangNhap extends JFrame {
             timer.start();
         } else {
             // Đăng nhập thất bại
-            lblThongBao.setText("Sai tên đăng nhập hoặc mật khẩu!");
-            lblThongBao.setForeground(new Color(200, 0, 0));
+            lblThongBao.setText("✗ Sai tên đăng nhập hoặc mật khẩu!");
+            lblThongBao.setForeground(ColorPalette.STATUS_ERROR);
             txtMatKhau.setText("");
             txtMatKhau.requestFocus();
         }

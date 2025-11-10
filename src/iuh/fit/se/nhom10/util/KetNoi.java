@@ -13,7 +13,7 @@ public class KetNoi {
     
     // Thông tin kết nối database
     private static final String SERVER = "localhost";
-    private static final String DATABASE = "QLRCP";
+    private static final String DATABASE = "QLRapPhim";
     private static final String USERNAME = "sa";
     private static final String PASSWORD = "260504";
     private static final int PORT = 1433;
