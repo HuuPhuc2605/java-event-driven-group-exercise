@@ -1,32 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>HTQL_Rap_Chieu_Phim</name>
-	<comment></comment>
-	<projects>
-	</projects>
-	<buildSpec>
-		<buildCommand>
-			<name>org.eclipse.jdt.core.javabuilder</name>
-			<arguments>
-			</arguments>
-		</buildCommand>
-	</buildSpec>
-	<natures>
-		<nature>org.eclipse.jdt.core.javanature</nature>
-	</natures>
-	<filteredResources>
-		<filter>
-<<<<<<< HEAD
-			<id>1762140150959</id>
-=======
-			<id>1762139296917</id>
->>>>>>> 58b274674b3e513ac3e2fa9b1cb3b1d735510388
-			<name></name>
-			<type>30</type>
-			<matcher>
-				<id>org.eclipse.core.resources.regexFilterMatcher</id>
-				<arguments>node_modules|\.git|__CREATED_BY_JAVA_LANGUAGE_SERVER__</arguments>
-			</matcher>
-		</filter>
-	</filteredResources>
+    <name>HTQL_Rap_Chieu_Phim</name>
+    <comment></comment>
+    <projects>
+    </projects>
+    <buildSpec>
+        <buildCommand>
+            <name>org.eclipse.jdt.core.javabuilder</name>
+            <arguments>
+            </arguments>
+        </buildCommand>
+    </buildSpec>
+    <natures>
+        <nature>org.eclipse.jdt.core.javanature</nature>
+    </natures>
+    <filteredResources>
+        <filter>
+            <id>1762140150959</id>
+            <name></name>
+            <type>30</type>
+            <matcher>
+                <id>org.eclipse.core.resources.regexFilterMatcher</id>
+                <arguments>node_modules|\.git|__CREATED_BY_JAVA_LANGUAGE_SERVER__</arguments>
+            </matcher>
+        </filter>
+    </filteredResources>
 </projectDescription>

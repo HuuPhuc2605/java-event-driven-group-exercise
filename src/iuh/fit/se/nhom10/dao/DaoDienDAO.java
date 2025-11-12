@@ -89,11 +89,19 @@ public class DaoDienDAO {
     }
 
     /**
-     * Xóa đạo diễn
+     * Xóa đạo diễn (set NULL các phim liên quan trước)
      */
     public boolean deleteDaoDien(String maDD) {
-        String sql = "DELETE FROM DaoDien WHERE maDD = ?";
         try {
+            // Trước tiên set NULL maDD trong bảng Phim
+            String sqlUpdatePhim = "UPDATE Phim SET maDD = NULL WHERE maDD = ?";
+            PreparedStatement psUpdate = connection.prepareStatement(sqlUpdatePhim);
+            psUpdate.setString(1, maDD);
+            psUpdate.executeUpdate();
+            psUpdate.close();
+            
+            // Sau đó xóa đạo diễn
+            String sql = "DELETE FROM DaoDien WHERE maDD = ?";
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, maDD);
             

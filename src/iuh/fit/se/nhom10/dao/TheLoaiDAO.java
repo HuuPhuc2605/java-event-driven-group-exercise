@@ -1,5 +1,6 @@
 package iuh.fit.se.nhom10.dao;
 
+import iuh.fit.se.nhom10.model.Phim;
 import iuh.fit.se.nhom10.model.TheLoai;
 import iuh.fit.se.nhom10.util.KetNoi;
 
@@ -86,10 +87,20 @@ public class TheLoaiDAO {
 
     /**
      * Xóa thể loại
+     * Added cascading delete - delete Phim first, then delete TheLoai
      */
     public boolean deleteTheLoai(int maTheLoai) {
-        String sql = "DELETE FROM TheLoai WHERE maTheLoai = ?";
         try {
+            // Trước tiên xóa tất cả phim của thể loại này
+            PhimDAO phimDAO = new PhimDAO();
+            List<Phim> phims = getAllPhimByTheLoai(maTheLoai);
+            
+            for (Phim phim : phims) {
+                phimDAO.deletePhim(phim.getMaPhim());
+            }
+            
+            // Sau đó xóa thể loại
+            String sql = "DELETE FROM TheLoai WHERE maTheLoai = ?";
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setInt(1, maTheLoai);
             
@@ -100,6 +111,34 @@ public class TheLoaiDAO {
             System.out.println("Lỗi xóa thể loại: " + e.getMessage());
         }
         return false;
+    }
+    
+    /**
+     * Lấy tất cả phim của một thể loại
+     */
+    private List<Phim> getAllPhimByTheLoai(int maTheLoai) {
+        List<Phim> list = new ArrayList<>();
+        String sql = "SELECT * FROM Phim WHERE maTheLoai = ?";
+        try {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, maTheLoai);
+            ResultSet rs = ps.executeQuery();
+            
+            while (rs.next()) {
+                Phim phim = new Phim();
+                phim.setMaPhim(rs.getString("maPhim"));
+                phim.setTenPhim(rs.getString("tenPhim"));
+                phim.setMaTheLoai(rs.getInt("maTheLoai"));
+                phim.setThoiLuong(rs.getInt("thoiLuong"));
+                phim.setMaDD(rs.getString("maDD"));
+                list.add(phim);
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            System.out.println("Lỗi lấy phim theo thể loại: " + e.getMessage());
+        }
+        return list;
     }
 
     /**

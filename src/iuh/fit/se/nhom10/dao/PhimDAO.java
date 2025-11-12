@@ -95,11 +95,16 @@ public class PhimDAO {
     }
 
     /**
-     * Xóa phim
+     * Xóa phim (xóa LichChieu trước, rồi xóa Phim)
      */
     public boolean deletePhim(String maPhim) {
-        String sql = "DELETE FROM Phim WHERE maPhim = ?";
         try {
+            // Trước tiên xóa tất cả lịch chiếu của phim này
+            LichChieuDAO lichChieuDAO = new LichChieuDAO();
+            lichChieuDAO.deleteByPhim(maPhim);
+            
+            // Sau đó xóa phim
+            String sql = "DELETE FROM Phim WHERE maPhim = ?";
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, maPhim);
             
