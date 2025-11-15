@@ -1,5 +1,10 @@
-﻿-- ========================
--- 1️⃣ BẢNG CHỨC VỤ
+CREATE DATABASE QLRCP;
+GO
+USE QLRCP;
+GO
+
+-- ========================
+-- 1️⃣ CHỨC VỤ
 -- ========================
 CREATE TABLE ChucVu (
     maChucVu INT IDENTITY(1,1) PRIMARY KEY,
@@ -57,6 +62,8 @@ CREATE TABLE HoaDon (
     maHD CHAR(10) PRIMARY KEY,
     ngayLap DATETIME NOT NULL DEFAULT GETDATE(),
     tongTien DECIMAL(12,2),
+    giamGia DECIMAL(12,2),
+    thanhToan DECIMAL(12,2),
     maNV CHAR(10) NOT NULL,
     maKH CHAR(10) NULL,
     maKM CHAR(10) NULL,
@@ -121,7 +128,6 @@ CREATE TABLE LoaiPhong (
 CREATE TABLE PhongChieu (
     maPhong CHAR(10) PRIMARY KEY,
     tenPhong NVARCHAR(100),
-    soGhe INT,
     maLoaiPhong INT NOT NULL,
     FOREIGN KEY (maLoaiPhong) REFERENCES LoaiPhong(maLoaiPhong)
 );
@@ -131,9 +137,9 @@ CREATE TABLE PhongChieu (
 -- ========================
 CREATE TABLE LichChieu (
     maLich CHAR(10) PRIMARY KEY,
-    ngayChieu DATE,
-    gioBatDau TIME,
-    gioKetThuc TIME,
+    ngayChieu DATE NOT NULL,
+    gioBatDau TIME NOT NULL,
+    gioKetThuc TIME NOT NULL,
     maPhim CHAR(10) NOT NULL,
     maPhong CHAR(10) NOT NULL,
     FOREIGN KEY (maPhim) REFERENCES Phim(maPhim),
@@ -147,7 +153,8 @@ CREATE TABLE GheNgoi (
     maGhe CHAR(10) PRIMARY KEY,
     hang NVARCHAR(10),
     cot INT,
-    trangThai NVARCHAR(20)
+    maPhong CHAR(10) NOT NULL,
+    FOREIGN KEY (maPhong) REFERENCES PhongChieu(maPhong)
 );
 
 -- ========================
@@ -168,10 +175,9 @@ CREATE TABLE VeXemPhim (
 -- ========================
 CREATE TABLE ChiTietHoaDon (
     maHD CHAR(10) NOT NULL,
-    maVe CHAR(10) NOT NULL,
-    soLuong INT DEFAULT 1,
+    maVe CHAR(10) NOT NULL UNIQUE,
     donGia DECIMAL(10,2),
-    thanhTien AS (soLuong * donGia) PERSISTED,
+    PRIMARY KEY (maHD, maVe),
     FOREIGN KEY (maHD) REFERENCES HoaDon(maHD),
     FOREIGN KEY (maVe) REFERENCES VeXemPhim(maVe)
 );

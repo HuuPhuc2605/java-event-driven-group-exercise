@@ -7,30 +7,21 @@ public class GheNgoi {
     private String maGhe;
     private String hang;
     private int cot;
-    private String trangThai;
-    private String maPhong; // Added maPhong to link seat to room
+    private String maPhong;
 
     // Constructor không tham số
     public GheNgoi() {
     }
 
     // Constructor đầy đủ
-    public GheNgoi(String maGhe, String hang, int cot, String trangThai) {
+    public GheNgoi(String maGhe, String hang, int cot, String maPhong) {
         this.maGhe = maGhe;
         this.hang = hang;
         this.cot = cot;
-        this.trangThai = trangThai;
-    }
-
-    // Constructor với phòng chiếu
-    public GheNgoi(String maGhe, String hang, int cot, String trangThai, String maPhong) {
-        this.maGhe = maGhe;
-        this.hang = hang;
-        this.cot = cot;
-        this.trangThai = trangThai;
         this.maPhong = maPhong;
     }
 
+    
     // Getters and Setters
     public String getMaGhe() {
         return maGhe;
@@ -56,14 +47,6 @@ public class GheNgoi {
         this.cot = cot;
     }
 
-    public String getTrangThai() {
-        return trangThai;
-    }
-
-    public void setTrangThai(String trangThai) {
-        this.trangThai = trangThai;
-    }
-
     public String getMaPhong() {
         return maPhong;
     }
@@ -78,7 +61,7 @@ public class GheNgoi {
                 "maGhe='" + maGhe + '\'' +
                 ", hang='" + hang + '\'' +
                 ", cot=" + cot +
-                ", trangThai='" + trangThai + '\'' +
+                ", maPhong='" + maPhong + '\'' +
                 '}';
     }
 }

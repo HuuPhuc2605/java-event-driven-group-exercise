@@ -9,6 +9,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.sql.SQLException;
 
 /**
@@ -91,6 +93,18 @@ public class FrmDangNhap extends JFrame {
         
         txtTenDangNhap = createStyledTextField();
         txtTenDangNhap.setAlignmentX(Component.LEFT_ALIGNMENT);
+        txtTenDangNhap.addKeyListener(new KeyListener() {
+            @Override
+            public void keyTyped(KeyEvent e) {}
+            
+            @Override
+            public void keyPressed(KeyEvent e) {}
+            
+            @Override
+            public void keyReleased(KeyEvent e) {
+                handleUsernameChange();
+            }
+        });
 
         JLabel lblPassword = new JLabel("Mật khẩu:");
         lblPassword.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL, Font.BOLD));
@@ -206,6 +220,34 @@ public class FrmDangNhap extends JFrame {
                 ));
             }
         });
+    }
+
+    /**
+     * Handle username change - autocomplete password
+     * Khi người dùng nhập username, tự động lấy mật khẩu từ CSDL và gợi ý
+     */
+    private void handleUsernameChange() {
+        String tenDangNhap = txtTenDangNhap.getText().trim();
+        
+        // Nếu username rỗng, xóa password
+        if (tenDangNhap.isEmpty()) {
+            txtMatKhau.setText("");
+            return;
+        }
+        
+        // Lấy tài khoản từ CSDL dựa trên username
+        TaiKhoanNhanVien taiKhoan = service.getTaiKhoanByUsername(tenDangNhap);
+        
+        if (taiKhoan != null) {
+            // Nếu tìm thấy, tự động điền mật khẩu
+            txtMatKhau.setText(taiKhoan.getMatKhau());
+            lblThongBao.setText("Mật khẩu đã được gợi ý");
+            lblThongBao.setForeground(ColorPalette.STATUS_INFO);
+        } else {
+            // Nếu không tìm thấy, xóa password field
+            txtMatKhau.setText("");
+            lblThongBao.setText("");
+        }
     }
 
     /**

@@ -1,250 +1,132 @@
-﻿
+﻿------------------------------------------------------------
+-- 1) CHỨC VỤ
+------------------------------------------------------------
+INSERT INTO ChucVu (tenChucVu)
+VALUES 
+    (N'Admin'),
+    (N'Nhân viên');
 
--- ========================
--- 1️⃣ BẢNG CHỨC VỤ
--- ========================
-CREATE TABLE ChucVu (
-    maChucVu INT IDENTITY(1,1) PRIMARY KEY,
-    tenChucVu NVARCHAR(50) NOT NULL
-);
+------------------------------------------------------------
+-- 2) NHÂN VIÊN
+------------------------------------------------------------
+INSERT INTO NhanVien (maNV, tenNV, maChucVu, luong, soDienThoai)
+VALUES
+('NV001', N'Nguyễn Văn A', 1, 15000000, '0901234567'),
+('NV002', N'Trần Thị B', 2, 8000000, '0907654321');
 
-INSERT INTO ChucVu (tenChucVu) VALUES 
-('Nhân viên bán vé'),
-('Kế toán'),
-('Quản lý rạp');
+------------------------------------------------------------
+-- 3) TÀI KHOẢN NHÂN VIÊN
+------------------------------------------------------------
+INSERT INTO TaiKhoanNhanVien (tenDangNhap, matKhau, vaiTro, maNV)
+VALUES
+('admin', '123456', N'Admin', 'NV001'),
+('nhanvien01', '123456', N'Nhân viên', 'NV002');
 
--- ========================
--- 2️⃣ NHÂN VIÊN
--- ========================
-CREATE TABLE NhanVien (
-    maNV CHAR(10) PRIMARY KEY,
-    tenNV NVARCHAR(100) NOT NULL,
-    maChucVu INT NOT NULL,
-    luong DECIMAL(12,2) NOT NULL,
-    soDienThoai VARCHAR(15),
-    FOREIGN KEY (maChucVu) REFERENCES ChucVu(maChucVu)
-);
+------------------------------------------------------------
+-- 4) KHÁCH HÀNG
+------------------------------------------------------------
+INSERT INTO KhachHang (maKH, tenKH, soDienThoai)
+VALUES
+('KH001', N'Lê Minh Huy', '0912345678'),
+('KH002', N'Phạm Thu Trang', '0987654321');
 
-INSERT INTO NhanVien (maNV, tenNV, maChucVu, luong, soDienThoai) VALUES
-('NV001', 'Nguyễn Văn A', 1, 7000000, '0901234567'),
-('NV002', 'Trần Thị B', 2, 9000000, '0912345678'),
-('NV003', 'Lê Văn C', 3, 12000000, '0923456789');
+------------------------------------------------------------
+-- 5) KHUYẾN MÃI
+------------------------------------------------------------
+INSERT INTO KhuyenMai (maKM, tenKM, moTa, tiLeGiam, ngayBatDau, ngayKetThuc)
+VALUES
+('KM001', N'Giảm 10%', N'Áp dụng toàn bộ phim', 10, '2024-01-01', '2024-12-31');
 
--- ========================
--- 3️⃣ TÀI KHOẢN NHÂN VIÊN
--- ========================
-CREATE TABLE TaiKhoanNhanVien (
-    tenDangNhap VARCHAR(50) PRIMARY KEY,
-    matKhau VARCHAR(100) NOT NULL,
-    vaiTro NVARCHAR(50),
-    maNV CHAR(10) NOT NULL UNIQUE,
-    FOREIGN KEY (maNV) REFERENCES NhanVien(maNV)
-);
+------------------------------------------------------------
+-- 6) ĐẠO DIỄN
+------------------------------------------------------------
+INSERT INTO DaoDien (maDD, tenDD, quocTich)
+VALUES
+('DD001', N'James Cameron', N'Mỹ'),
+('DD002', N'Victor Vũ', N'Việt Nam');
 
-INSERT INTO TaiKhoanNhanVien (tenDangNhap, matKhau, vaiTro, maNV) VALUES
-('nva', '123456', 'NhanVien', 'NV001'),
-('ttb', '123456', 'KeToan', 'NV002'),
-('lvc', '123456', 'Admin', 'NV003');
+------------------------------------------------------------
+-- 7) THỂ LOẠI
+------------------------------------------------------------
+INSERT INTO TheLoai (tenTheLoai)
+VALUES
+(N'Hành động'),
+(N'Kinh dị'),
+(N'Hài');
 
--- ========================
--- 4️⃣ KHÁCH HÀNG
--- ========================
-CREATE TABLE KhachHang (
-    maKH CHAR(10) PRIMARY KEY,
-    tenKH NVARCHAR(100) NOT NULL,
-    soDienThoai VARCHAR(15)
-);
+------------------------------------------------------------
+-- 8) PHIM
+------------------------------------------------------------
+INSERT INTO Phim (maPhim, tenPhim, maTheLoai, thoiLuong, maDD)
+VALUES
+('P001', N'Avatar 2', 1, 190, 'DD001'),
+('P002', N'Mắt Biếc', 3, 120, 'DD002');
 
-INSERT INTO KhachHang (maKH, tenKH, soDienThoai) VALUES
-('KH001', 'Phạm Văn D', '0987654321'),
-('KH002', 'Nguyễn Thị E', '0976543210');
+------------------------------------------------------------
+-- 9) LOẠI PHÒNG
+------------------------------------------------------------
+INSERT INTO LoaiPhong (tenLoaiPhong)
+VALUES
+(N'2D'),
+(N'3D');
 
--- ========================
--- 5️⃣ KHUYẾN MÃI
--- ========================
-CREATE TABLE KhuyenMai (
-    maKM CHAR(10) PRIMARY KEY,
-    tenKM NVARCHAR(100),
-    moTa NVARCHAR(255),
-    tiLeGiam DECIMAL(5,2),
-    ngayBatDau DATE,
-    ngayKetThuc DATE
-);
+------------------------------------------------------------
+-- 10) PHÒNG CHIẾU
+------------------------------------------------------------
+INSERT INTO PhongChieu (maPhong, tenPhong, maLoaiPhong)
+VALUES
+('PC01', N'Phòng 1', 1),
+('PC02', N'Phòng 2', 2);
 
-INSERT INTO KhuyenMai (maKM, tenKM, moTa, tiLeGiam, ngayBatDau, ngayKetThuc) VALUES
-('KM001', 'Giảm 10%', 'Giảm giá 10% cho tất cả khách hàng', 10, '2025-11-01', '2025-11-30'),
-('KM002', 'Mua 1 tặng 1', 'Khuyến mãi mua 1 vé tặng 1 vé', 50, '2025-11-05', '2025-11-15');
+------------------------------------------------------------
+-- 11) GHẾ NGỒI (9 ghế)
+------------------------------------------------------------
+INSERT INTO GheNgoi (maGhe, hang, cot, maPhong)
+VALUES
+('G_A1', 'A', 1, 'PC01'),
+('G_A2', 'A', 2, 'PC01'),
+('G_A3', 'A', 3, 'PC01'),
+('G_B1', 'B', 1, 'PC01'),
+('G_B2', 'B', 2, 'PC01'),
+('G_B3', 'B', 3, 'PC01'),
+('G_C1', 'C', 1, 'PC01'),
+('G_C2', 'C', 2, 'PC01'),
+('G_C3', 'C', 3, 'PC01');
 
--- ========================
--- 6️⃣ ĐẠO DIỄN
--- ========================
-CREATE TABLE DaoDien (
-    maDD CHAR(10) PRIMARY KEY,
-    tenDD NVARCHAR(100),
-    quocTich NVARCHAR(50)
-);
+------------------------------------------------------------
+-- 12) LỊCH CHIẾU
+------------------------------------------------------------
+INSERT INTO LichChieu (maLich, ngayChieu, gioBatDau, gioKetThuc, maPhim, maPhong)
+VALUES
+('LC001', '2024-11-30', '18:00', '20:10', 'P001', 'PC01'),
+('LC002', '2024-11-30', '20:30', '22:30', 'P002', 'PC01');
 
-INSERT INTO DaoDien (maDD, tenDD, quocTich) VALUES
-('DD001', 'Christopher Nolan', 'Mỹ'),
-('DD002', 'Hayao Miyazaki', 'Nhật Bản');
+------------------------------------------------------------
+-- 13) VÉ XEM PHIM (2 ghế cho LC001)
+------------------------------------------------------------
+INSERT INTO VeXemPhim (maVe, maLich, maGhe, donGia)
+VALUES
+('VE001', 'LC001', 'G_A1', 90000),
+('VE002', 'LC001', 'G_A2', 90000);
 
--- ========================
--- 7️⃣ THỂ LOẠI
--- ========================
-CREATE TABLE TheLoai (
-    maTheLoai INT IDENTITY(1,1) PRIMARY KEY,
-    tenTheLoai NVARCHAR(100) NOT NULL
-);
+------------------------------------------------------------
+-- 14) HÓA ĐƠN
+------------------------------------------------------------
+INSERT INTO HoaDon (maHD, tongTien, giamGia, thanhToan, maNV, maKH, maKM)
+VALUES 
+('HD001', 180000, 18000, 162000, 'NV002', 'KH001', 'KM001');
 
-INSERT INTO TheLoai (tenTheLoai) VALUES
-('Hành động'),
-('Hoạt hình'),
-('Kinh dị');
+------------------------------------------------------------
+-- 15) CHI TIẾT HÓA ĐƠN
+------------------------------------------------------------
+INSERT INTO ChiTietHoaDon (maHD, maVe, donGia)
+VALUES
+('HD001', 'VE001', 90000),
+('HD001', 'VE002', 90000);
 
--- ========================
--- 🔟 PHIM
--- ========================
-CREATE TABLE Phim (
-    maPhim CHAR(10) PRIMARY KEY,
-    tenPhim NVARCHAR(200) NOT NULL,
-    maTheLoai INT NOT NULL,
-    thoiLuong INT,
-    maDD CHAR(10) NOT NULL,
-    FOREIGN KEY (maTheLoai) REFERENCES TheLoai(maTheLoai),
-    FOREIGN KEY (maDD) REFERENCES DaoDien(maDD)
-);
-
-INSERT INTO Phim (maPhim, tenPhim, maTheLoai, thoiLuong, maDD) VALUES
-('P001', 'Inception', 1, 148, 'DD001'),
-('P002', 'Spirited Away', 2, 125, 'DD002');
-
--- ========================
--- 1️⃣1️⃣ LOẠI PHÒNG
--- ========================
-CREATE TABLE LoaiPhong (
-    maLoaiPhong INT IDENTITY(1,1) PRIMARY KEY,
-    tenLoaiPhong NVARCHAR(100) NOT NULL
-);
-
-INSERT INTO LoaiPhong (tenLoaiPhong) VALUES
-('Phòng thường'),
-('Phòng VIP');
-
--- ========================
--- 1️⃣2️⃣ PHÒNG CHIẾU
--- ========================
-CREATE TABLE PhongChieu (
-    maPhong CHAR(10) PRIMARY KEY,
-    tenPhong NVARCHAR(100),
-    soGhe INT,
-    maLoaiPhong INT NOT NULL,
-    FOREIGN KEY (maLoaiPhong) REFERENCES LoaiPhong(maLoaiPhong)
-);
-
-INSERT INTO PhongChieu (maPhong, tenPhong, soGhe, maLoaiPhong) VALUES
-('PC001', 'Phòng 1', 100, 1),
-('PC002', 'Phòng 2', 50, 2);
-
--- ========================
--- 1️⃣3️⃣ LỊCH CHIẾU
--- ========================
-CREATE TABLE LichChieu (
-    maLich CHAR(10) PRIMARY KEY,
-    ngayChieu DATE,
-    gioBatDau TIME,
-    gioKetThuc TIME,
-    maPhim CHAR(10) NOT NULL,
-    maPhong CHAR(10) NOT NULL,
-    FOREIGN KEY (maPhim) REFERENCES Phim(maPhim),
-    FOREIGN KEY (maPhong) REFERENCES PhongChieu(maPhong)
-);
-
-INSERT INTO LichChieu (maLich, ngayChieu, gioBatDau, gioKetThuc, maPhim, maPhong) VALUES
-('LC001', '2025-11-10', '18:00', '20:30', 'P001', 'PC001'),
-('LC002', '2025-11-10', '20:30', '22:35', 'P002', 'PC002');
-
--- ========================
--- 1️⃣4️⃣ GHẾ NGỒI
--- ========================
-CREATE TABLE GheNgoi (
-    maGhe CHAR(10) PRIMARY KEY,
-    hang NVARCHAR(10),
-    cot INT,
-    trangThai NVARCHAR(20)
-);
-
-INSERT INTO GheNgoi (maGhe, hang, cot, trangThai) VALUES
-('G001', 'A', 1, 'Trống'),
-('G002', 'A', 2, 'Trống'),
-('G003', 'B', 1, 'Trống');
-
--- ========================
--- 1️⃣5️⃣ VÉ XEM PHIM
--- ========================
-CREATE TABLE VeXemPhim (
-    maVe CHAR(10) PRIMARY KEY,
-    ngayBan DATE DEFAULT GETDATE(),
-    maLich CHAR(10) NOT NULL,
-    maGhe CHAR(10) NOT NULL,
-    donGia DECIMAL(10,2),
-    FOREIGN KEY (maLich) REFERENCES LichChieu(maLich),
-    FOREIGN KEY (maGhe) REFERENCES GheNgoi(maGhe)
-);
-
-INSERT INTO VeXemPhim (maVe, maLich, maGhe, donGia) VALUES
-('V001', 'LC001', 'G001', 50000),
-('V002', 'LC001', 'G002', 50000),
-('V003', 'LC002', 'G003', 70000);
-
--- ========================
--- 1️⃣6️⃣ HÓA ĐƠN
--- ========================
-CREATE TABLE HoaDon (
-    maHD CHAR(10) PRIMARY KEY,
-    ngayLap DATETIME NOT NULL DEFAULT GETDATE(),
-    tongTien DECIMAL(12,2),
-    maNV CHAR(10) NOT NULL,
-    maKH CHAR(10) NULL,
-    maKM CHAR(10) NULL,
-    FOREIGN KEY (maNV) REFERENCES NhanVien(maNV),
-    FOREIGN KEY (maKH) REFERENCES KhachHang(maKH),
-    FOREIGN KEY (maKM) REFERENCES KhuyenMai(maKM)
-);
-
-INSERT INTO HoaDon (maHD, maNV, maKH, maKM, tongTien) VALUES
-('HD001', 'NV001', 'KH001', 'KM001', 90000),
-('HD002', 'NV001', 'KH002', NULL, 70000);
-
--- ========================
--- 1️⃣7️⃣ CHI TIẾT HÓA ĐƠN
--- ========================
-CREATE TABLE ChiTietHoaDon (
-    maHD CHAR(10) NOT NULL,
-    maVe CHAR(10) NOT NULL,
-    soLuong INT DEFAULT 1,
-    donGia DECIMAL(10,2),
-    thanhTien AS (soLuong * donGia) PERSISTED,
-    FOREIGN KEY (maHD) REFERENCES HoaDon(maHD),
-    FOREIGN KEY (maVe) REFERENCES VeXemPhim(maVe)
-);
-
-INSERT INTO ChiTietHoaDon (maHD, maVe, soLuong, donGia) VALUES
-('HD001', 'V001', 1, 50000),
-('HD001', 'V002', 1, 50000),
-('HD002', 'V003', 1, 70000);
-
--- ========================
--- 1️⃣8️⃣ THANH TOÁN
--- ========================
-CREATE TABLE ThanhToan (
-    maThanhToan CHAR(10) PRIMARY KEY,
-    maHD CHAR(10) NOT NULL UNIQUE,
-    phuongThuc NVARCHAR(50),
-    ngayThanhToan DATETIME DEFAULT GETDATE(),
-    trangThai NVARCHAR(50),
-    FOREIGN KEY (maHD) REFERENCES HoaDon(maHD)
-);
-
-INSERT INTO ThanhToan (maThanhToan, maHD, phuongThuc, trangThai) VALUES
-('TT001', 'HD001', 'Tiền mặt', 'Đã thanh toán'),
-('TT002', 'HD002', 'Thẻ', 'Chưa thanh toán');
+------------------------------------------------------------
+-- 16) THANH TOÁN
+------------------------------------------------------------
+INSERT INTO ThanhToan (maThanhToan, maHD, phuongThuc, trangThai)
+VALUES
+('TT001', 'HD001', N'Tiền mặt', N'Hoàn tất');

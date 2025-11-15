@@ -109,4 +109,15 @@ public class TaiKhoanNhanVienService {
     public List<TaiKhoanNhanVien> getAllAdmins() {
         return dao.getAllTaiKhoan();
     }
+
+    /**
+     * Lấy tài khoản theo username để gợi ý mật khẩu
+     * added method to retrieve account by username for password autocomplete
+     */
+    public TaiKhoanNhanVien getTaiKhoanByUsername(String tenDangNhap) {
+        if (tenDangNhap == null || tenDangNhap.trim().isEmpty()) {
+            return null;
+        }
+        return dao.getTaiKhoanByUsername(tenDangNhap);
+    }
 }

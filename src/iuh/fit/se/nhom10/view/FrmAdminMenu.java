@@ -24,7 +24,8 @@ public class FrmAdminMenu extends JFrame {
     private JPanel pnlContentArea;
     private JLabel lblCurrentModule;
     private JPanel pnlDashboard;
-    
+    private JButton selectedButton;
+
     public FrmAdminMenu(TaiKhoanNhanVien admin) {
         this.adminHienTai = admin;
         setupUI();
@@ -75,7 +76,7 @@ public class FrmAdminMenu extends JFrame {
         pnlHeader.setLayout(new BorderLayout());
         pnlHeader.setBorder(new EmptyBorder(15, 20, 15, 20));
 
-        JLabel lblTitle = new JLabel("\u1F3AC HỆ THỐNG QUẢN LÝ RẠP CHIẾU PHIM");
+        JLabel lblTitle = new JLabel("HỆ THỐNG QUẢN LÝ RẠP CHIẾU PHIM");
         lblTitle.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_TITLE, Font.BOLD));
         lblTitle.setForeground(ColorPalette.TEXT_HEADER_TITLE);
 
@@ -159,7 +160,7 @@ public class FrmAdminMenu extends JFrame {
 
     /**
      * Tạo nút sidebar với ButtonStyle
-     * Fixed button color visibility - added opaque, repaint(), and proper hover/press states
+     * Added tracking for selected button to highlight current menu item
      */
     private JButton createSidebarButton(String text, String action) {
         JButton btn = new JButton(text);
@@ -181,14 +182,20 @@ public class FrmAdminMenu extends JFrame {
         btn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                btn.setBackground(ColorPalette.BUTTON_PRIMARY_BG_HOVER);
+                if (btn != selectedButton) {
+                    btn.setBackground(ColorPalette.BUTTON_PRIMARY_BG_HOVER);
+                }
                 btn.setForeground(Color.WHITE);
                 btn.repaint();
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                btn.setBackground(ColorPalette.BUTTON_PRIMARY_BG);
+                if (btn == selectedButton) {
+                    btn.setBackground(ColorPalette.PRIMARY_DARK);
+                } else {
+                    btn.setBackground(ColorPalette.BUTTON_PRIMARY_BG);
+                }
                 btn.setForeground(Color.WHITE);
                 btn.repaint();
             }
@@ -202,13 +209,21 @@ public class FrmAdminMenu extends JFrame {
             
             @Override
             public void mouseReleased(MouseEvent e) {
-                btn.setBackground(ColorPalette.BUTTON_PRIMARY_BG_HOVER);
+                btn.setBackground(ColorPalette.PRIMARY_DARK);
                 btn.setForeground(Color.WHITE);
                 btn.repaint();
             }
         });
 
-        btn.addActionListener(e -> switchContent(action, text));
+        btn.addActionListener(e -> {
+            if (selectedButton != null) {
+                selectedButton.setBackground(ColorPalette.BUTTON_PRIMARY_BG);
+            }
+            selectedButton = btn;
+            btn.setBackground(ColorPalette.PRIMARY_DARK);
+            btn.repaint();
+            switchContent(action, text);
+        });
         
         return btn;
     }
@@ -536,6 +551,27 @@ public class FrmAdminMenu extends JFrame {
                     pnlContentArea.add(lblError, BorderLayout.CENTER);
                 }
                 break;
+            case "lich_chieu":
+                try {
+                    // Load FrmQuanLyPhongChieuPanel as content panel
+                    FrmQuanLyLichChieuPanel pnlQuanLyLichChieuPanel = new FrmQuanLyLichChieuPanel(adminHienTai);
+                    pnlContentArea.add(pnlQuanLyLichChieuPanel, BorderLayout.CENTER);
+                } catch (Exception e) {
+                    JLabel lblError = new JLabel("Lỗi tải trang quản lý lịch chiếu: " + e.getMessage());
+                    lblError.setForeground(ColorPalette.STATUS_ERROR);
+                    pnlContentArea.add(lblError, BorderLayout.CENTER);
+                }
+                break;
+            case "khuyen_mai":
+                try {
+                    FrmQuanLyKhuyenMaiPanel pnlQuanLyKhuyenMai = new FrmQuanLyKhuyenMaiPanel(adminHienTai);
+                    pnlContentArea.add(pnlQuanLyKhuyenMai, BorderLayout.CENTER);
+                } catch (Exception e) {
+                    JLabel lblError = new JLabel("Lỗi tải trang quản lý khuyến mãi: " + e.getMessage());
+                    lblError.setForeground(ColorPalette.STATUS_ERROR);
+                    pnlContentArea.add(lblError, BorderLayout.CENTER);
+                }
+                break;
             default:
                 JLabel lblDev = new JLabel("Chức năng " + moduleTitle + " đang phát triển");
                 lblDev.setForeground(ColorPalette.TEXT_PLACEHOLDER);
@@ -565,9 +601,9 @@ public class FrmAdminMenu extends JFrame {
         btnLogout.setBackground(ColorPalette.BUTTON_DANGER_BG);
         btnLogout.setForeground(Color.WHITE);
         btnLogout.setFocusPainted(false);
-        btnLogout.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnLogout.setContentAreaFilled(true);
-        btnLogout.setOpaque(true);
+//        btnLogout.setCursor(new Cursor(Cursor.HAND_CURSOR));
+//        btnLogout.setContentAreaFilled(true);
+//        btnLogout.setOpaque(true);
         btnLogout.addActionListener(e -> handleLogout());
 
         JLabel lblCopyright = new JLabel("© 2025 Nhóm 10 - Hệ Thống Quản Lý Rạp Chiếu Phim");

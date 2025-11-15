@@ -6,7 +6,6 @@ package iuh.fit.se.nhom10.model;
 public class PhongChieu {
     private String maPhong;
     private String tenPhong;
-    private int soGhe;
     private int maLoaiPhong;
 
     // Constructor không tham số
@@ -14,10 +13,9 @@ public class PhongChieu {
     }
 
     // Constructor đầy đủ
-    public PhongChieu(String maPhong, String tenPhong, int soGhe, int maLoaiPhong) {
+    public PhongChieu(String maPhong, String tenPhong, int maLoaiPhong) {
         this.maPhong = maPhong;
         this.tenPhong = tenPhong;
-        this.soGhe = soGhe;
         this.maLoaiPhong = maLoaiPhong;
     }
 
@@ -38,14 +36,6 @@ public class PhongChieu {
         this.tenPhong = tenPhong;
     }
 
-    public int getSoGhe() {
-        return soGhe;
-    }
-
-    public void setSoGhe(int soGhe) {
-        this.soGhe = soGhe;
-    }
-
     public int getMaLoaiPhong() {
         return maLoaiPhong;
     }
@@ -59,7 +49,6 @@ public class PhongChieu {
         return "PhongChieu{" +
                 "maPhong='" + maPhong + '\'' +
                 ", tenPhong='" + tenPhong + '\'' +
-                ", soGhe=" + soGhe +
                 ", maLoaiPhong=" + maLoaiPhong +
                 '}';
     }

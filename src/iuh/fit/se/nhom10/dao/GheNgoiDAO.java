@@ -24,19 +24,26 @@ public class GheNgoiDAO {
      * Thêm ghế mới
      */
     public boolean createGheNgoi(GheNgoi ghe) {
-        String sql = "INSERT INTO GheNgoi (maGhe, hang, cot, trangThai) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO GheNgoi (maGhe, hang, cot, maPhong) VALUES (?, ?, ?, ?)";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, ghe.getMaGhe());
             ps.setString(2, ghe.getHang());
             ps.setInt(3, ghe.getCot());
-            ps.setString(4, ghe.getTrangThai());
+            ps.setString(4, ghe.getMaPhong());
+            
+            System.out.println("[v0] GheNgoiDAO.createGheNgoi - Attempting to insert: " + ghe.toString());
             
             int result = ps.executeUpdate();
             ps.close();
+            
+            System.out.println("[v0] GheNgoiDAO.createGheNgoi - Result: " + result + " rows affected");
             return result > 0;
         } catch (SQLException e) {
             System.out.println("Lỗi thêm ghế: " + e.getMessage());
+            System.out.println("[v0] SQL State: " + e.getSQLState());
+            System.out.println("[v0] Error Code: " + e.getErrorCode());
+            e.printStackTrace();
         }
         return false;
     }
@@ -56,7 +63,7 @@ public class GheNgoiDAO {
                 ghe.setMaGhe(rs.getString("maGhe"));
                 ghe.setHang(rs.getString("hang"));
                 ghe.setCot(rs.getInt("cot"));
-                ghe.setTrangThai(rs.getString("trangThai"));
+                ghe.setMaPhong(rs.getString("maPhong"));
                 
                 rs.close();
                 ps.close();
@@ -71,15 +78,15 @@ public class GheNgoiDAO {
     }
 
     /**
-     * Cập nhật trạng thái ghế
+     * Cập nhật ghế
      */
     public boolean updateGheNgoi(GheNgoi ghe) {
-        String sql = "UPDATE GheNgoi SET hang = ?, cot = ?, trangThai = ? WHERE maGhe = ?";
+        String sql = "UPDATE GheNgoi SET hang = ?, cot = ?, maPhong = ? WHERE maGhe = ?";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, ghe.getHang());
             ps.setInt(2, ghe.getCot());
-            ps.setString(3, ghe.getTrangThai());
+            ps.setString(3, ghe.getMaPhong());
             ps.setString(4, ghe.getMaGhe());
             
             int result = ps.executeUpdate();
@@ -124,7 +131,7 @@ public class GheNgoiDAO {
                 ghe.setMaGhe(rs.getString("maGhe"));
                 ghe.setHang(rs.getString("hang"));
                 ghe.setCot(rs.getInt("cot"));
-                ghe.setTrangThai(rs.getString("trangThai"));
+                ghe.setMaPhong(rs.getString("maPhong"));
                 list.add(ghe);
             }
             rs.close();
@@ -153,5 +160,56 @@ public class GheNgoiDAO {
             System.out.println("Lỗi xóa ghế với references: " + e.getMessage());
         }
         return false;
+    }
+
+    /**
+     * Lấy ghế theo phòng chiếu
+     */
+    public List<GheNgoi> getGheByPhong(String maPhong) {
+        List<GheNgoi> list = new ArrayList<>();
+        String sql = "SELECT * FROM GheNgoi WHERE maPhong = ? ORDER BY hang, cot";
+        try {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, maPhong);
+            
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                GheNgoi ghe = new GheNgoi();
+                ghe.setMaGhe(rs.getString("maGhe"));
+                ghe.setHang(rs.getString("hang"));
+                ghe.setCot(rs.getInt("cot"));
+                ghe.setMaPhong(rs.getString("maPhong"));
+                list.add(ghe);
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            System.out.println("Lỗi lấy ghế theo phòng: " + e.getMessage());
+        }
+        return list;
+    }
+
+    /**
+     * Lấy danh sách ghế đã đặt cho một lịch chiếu
+     */
+    public List<String> getBookedSeatsForScreening(String maLich) {
+        List<String> bookedSeats = new ArrayList<>();
+        String sql = "SELECT DISTINCT g.maGhe FROM VeXemPhim v " +
+                     "JOIN GheNgoi g ON v.maGhe = g.maGhe " +
+                     "WHERE v.maLich = ?";
+        try {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, maLich);
+            
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                bookedSeats.add(rs.getString("maGhe"));
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            System.out.println("Lỗi lấy ghế đã đặt: " + e.getMessage());
+        }
+        return bookedSeats;
     }
 }

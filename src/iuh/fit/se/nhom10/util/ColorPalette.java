@@ -15,6 +15,16 @@ public class ColorPalette {
     public static final Color PRIMARY_LIGHT = new Color(29, 145, 187);    // Xanh nhạt
     public static final Color ACCENT = new Color(0, 184, 148);            // Xanh lá cây (accent)
     
+    // ====== SEAT COLORS ======
+    public static final Color SEAT_EMPTY = new Color(52, 211, 153);       // Xanh lá nhạt - ghế trống
+    public static final Color SEAT_SELECTED = new Color(34, 197, 94);     // Xanh lá đậm - ghế được chọn
+    public static final Color SEAT_BOOKED = new Color(156, 163, 175);     // Xám - ghế đã đặt
+    public static final Color SEAT_MAINTENANCE = new Color(239, 68, 68);  // Đỏ - ghế bảo trì
+    
+    // ====== ROOM STATUS COLORS ======
+    public static final Color ROOM_AVAILABLE = new Color(52, 211, 153);   // Xanh - còn chỗ
+    public static final Color ROOM_FULL = new Color(239, 68, 68);          // Đỏ - phòng full
+    
     // ====== HEADER GRADIENT ======
     public static final Color HEADER_GRADIENT_TOP = PRIMARY;
     public static final Color HEADER_GRADIENT_BOTTOM = PRIMARY_DARK;
@@ -54,6 +64,18 @@ public class ColorPalette {
     public static final Color BUTTON_DANGER_BG_HOVER = new Color(200, 35, 51);
     public static final Color BUTTON_DANGER_BG_PRESS = new Color(180, 20, 36);
     public static final Color BUTTON_DANGER_TEXT = Color.WHITE;
+    
+    // Success Button (Thêm/Lưu)
+    public static final Color BUTTON_SUCCESS_BG = new Color(40, 167, 69);
+    public static final Color BUTTON_SUCCESS_BG_HOVER = new Color(33, 136, 56);
+    public static final Color BUTTON_SUCCESS_BG_PRESS = new Color(26, 110, 44);
+    public static final Color BUTTON_SUCCESS_TEXT = Color.WHITE;
+    
+    // Info Button (Sửa)
+    public static final Color BUTTON_INFO_BG = PRIMARY;
+    public static final Color BUTTON_INFO_BG_HOVER = PRIMARY_LIGHT;
+    public static final Color BUTTON_INFO_BG_PRESS = PRIMARY_DARK;
+    public static final Color BUTTON_INFO_TEXT = Color.WHITE;
     
     // Settings Button
     public static final Color BUTTON_SETTINGS_BG = new Color(150, 150, 150);
