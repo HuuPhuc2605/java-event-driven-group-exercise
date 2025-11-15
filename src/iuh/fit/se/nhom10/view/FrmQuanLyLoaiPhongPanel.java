@@ -3,6 +3,7 @@ package iuh.fit.se.nhom10.view;
 import iuh.fit.se.nhom10.dao.LoaiPhongDAO;
 import iuh.fit.se.nhom10.model.LoaiPhong;
 import iuh.fit.se.nhom10.model.TaiKhoanNhanVien;
+import iuh.fit.se.nhom10.util.ButtonStyle;
 import iuh.fit.se.nhom10.util.ColorPalette;
 
 import javax.swing.*;
@@ -10,9 +11,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +24,7 @@ public class FrmQuanLyLoaiPhongPanel extends JPanel {
     private DefaultTableModel tableModel;
     private JTable tblLoaiPhong;
     private JTextField txtSearch;
-    private JButton btnThem, btnSua, btnXoa, btnLamMoi;
+    private JButton btnThem, btnSua, btnXoa;
     private LoaiPhongDAO loaiPhongDAO;
     private List<LoaiPhong> currentList;
     private TaiKhoanNhanVien admin;
@@ -40,135 +41,120 @@ public class FrmQuanLyLoaiPhongPanel extends JPanel {
     private void initComponents() {
         setLayout(new BorderLayout(10, 10));
         setBackground(ColorPalette.BACKGROUND_CONTENT);
-        setBorder(new EmptyBorder(10, 10, 10, 10));
+        setBorder(new EmptyBorder(15, 15, 15, 15));
 
-        // Panel tìm kiếm
-        JPanel pnlSearch = createSearchPanel();
+        JPanel pnlHeader = createHeaderPanel();
+        add(pnlHeader, BorderLayout.NORTH);
         
         // Panel bảng
         JPanel pnlTable = createTablePanel();
-        
-        // Panel nút điều khiển
-        JPanel pnlButton = createButtonPanel();
-
-        add(pnlSearch, BorderLayout.NORTH);
         add(pnlTable, BorderLayout.CENTER);
-        add(pnlButton, BorderLayout.SOUTH);
     }
 
-    private JPanel createSearchPanel() {
-        JPanel pnl = new JPanel();
-        pnl.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5));
+    private JPanel createHeaderPanel() {
+        JPanel pnl = new JPanel(new BorderLayout(10, 0));
         pnl.setBackground(ColorPalette.BACKGROUND_CONTENT);
+        pnl.setPreferredSize(new Dimension(0, 60));
 
-        JLabel lblSearch = new JLabel("Tìm kiếm:");
-        lblSearch.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL, Font.PLAIN));
-        
-        txtSearch = new JTextField(20);
+        JPanel pnlTitle = new JPanel();
+        pnlTitle.setPreferredSize(new Dimension(300, 50));
+        pnlTitle.setBackground(ColorPalette.PRIMARY);
+        pnlTitle.setLayout(new BoxLayout(pnlTitle, BoxLayout.X_AXIS));
+        pnlTitle.setBorder(new EmptyBorder(0, 15, 0, 15));
+
+        JLabel lblTitle = new JLabel("Quản Lý Loại Phòng");
+        lblTitle.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_TITLE - 4, Font.BOLD));
+        lblTitle.setForeground(Color.WHITE);
+        pnlTitle.add(lblTitle);
+
+        // Search and button control panel
+        JPanel pnlSearchControl = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 7));
+        pnlSearchControl.setBackground(ColorPalette.BACKGROUND_CONTENT);
+
+        // Search input
+        txtSearch = new JTextField();
+        txtSearch.setPreferredSize(new Dimension(250, 38));
         txtSearch.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_INPUT, Font.PLAIN));
-        txtSearch.setBorder(BorderFactory.createLineBorder(ColorPalette.BORDER_INPUT));
+        txtSearch.setToolTipText("Tìm kiếm theo tên loại phòng");
+        txtSearch.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(ColorPalette.BORDER_INPUT, 1),
+            BorderFactory.createEmptyBorder(8, 10, 8, 10)
+        ));
         txtSearch.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
             public void insertUpdate(DocumentEvent e) { filterTable(); }
-            @Override
             public void removeUpdate(DocumentEvent e) { filterTable(); }
-            @Override
             public void changedUpdate(DocumentEvent e) { filterTable(); }
         });
 
-        pnl.add(lblSearch);
-        pnl.add(txtSearch);
+        btnThem = ButtonStyle.createPrimaryButton("Thêm Loại");
+        btnThem.setBackground(ColorPalette.BUTTON_SUCCESS_BG);
+        btnThem.addActionListener(e -> showDialogThem());
+        
+        btnSua = ButtonStyle.createPrimaryButton("Sửa");
+        btnSua.addActionListener(e -> showDialogSua());
+        
+        btnXoa = ButtonStyle.createDangerButton("Xóa");
+        btnXoa.addActionListener(e -> showDialogXoa());
+
+        pnlSearchControl.add(txtSearch);
+        pnlSearchControl.add(btnThem);
+        pnlSearchControl.add(btnSua);
+        pnlSearchControl.add(btnXoa);
+
+        pnl.add(pnlTitle, BorderLayout.WEST);
+        pnl.add(pnlSearchControl, BorderLayout.EAST);
+
         return pnl;
     }
 
     private JPanel createTablePanel() {
         JPanel pnl = new JPanel(new BorderLayout());
         pnl.setBackground(ColorPalette.BACKGROUND_CONTENT);
+        pnl.setBorder(new EmptyBorder(0, 0, 0, 0));
 
-        // Tạo table model
-        tableModel = new DefaultTableModel(
-            new String[]{"STT", "Mã Loại", "Tên Loại Phòng"},
-            0
-        ) {
+        tableModel = new DefaultTableModel() {
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
         };
+        tableModel.addColumn("Mã Loại Phòng");
+        tableModel.addColumn("Tên Loại Phòng");
 
         tblLoaiPhong = new JTable(tableModel);
         tblLoaiPhong.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL, Font.PLAIN));
-        tblLoaiPhong.setRowHeight(25);
-        tblLoaiPhong.setBackground(Color.WHITE);
-        tblLoaiPhong.setGridColor(ColorPalette.BORDER_LIGHT);
-        tblLoaiPhong.getTableHeader().setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL, Font.BOLD));
-        tblLoaiPhong.getTableHeader().setBackground(ColorPalette.PRIMARY);
-        tblLoaiPhong.getTableHeader().setForeground(Color.WHITE);
-        tblLoaiPhong.getSelectionModel().addListSelectionListener(e -> {
-            if (tblLoaiPhong.getSelectedRow() != -1) {
-                btnSua.setEnabled(true);
-                btnXoa.setEnabled(true);
+        tblLoaiPhong.setRowHeight(35);
+        tblLoaiPhong.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblLoaiPhong.setGridColor(new Color(220, 225, 235));
+
+        JTableHeader header =  tblLoaiPhong.getTableHeader();
+        header.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL + 1, Font.BOLD));
+        header.setBackground(ColorPalette.PRIMARY);
+        header.setForeground(Color.WHITE);
+        header.setPreferredSize(new Dimension(header.getWidth(), 40));
+        
+        header.setDefaultRenderer(new javax.swing.table.DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, 
+                                                          boolean hasFocus, int row, int column) {
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                setBackground(ColorPalette.PRIMARY);
+                setForeground(Color.WHITE);
+                setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL + 1, Font.BOLD));
+                setHorizontalAlignment(CENTER);
+                setBorder(BorderFactory.createEmptyBorder(8, 5, 8, 5));
+                return this;
             }
         });
 
+        tblLoaiPhong.getColumnModel().getColumn(0).setPreferredWidth(150);
+        tblLoaiPhong.getColumnModel().getColumn(1).setPreferredWidth(350);
+
         JScrollPane scrollPane = new JScrollPane(tblLoaiPhong);
-        scrollPane.setBorder(BorderFactory.createLineBorder(ColorPalette.BORDER_LIGHT));
+        scrollPane.setBorder(BorderFactory.createLineBorder(ColorPalette.BORDER_LIGHT, 1));
         pnl.add(scrollPane, BorderLayout.CENTER);
 
         return pnl;
-    }
-
-    private JPanel createButtonPanel() {
-        JPanel pnl = new JPanel();
-        pnl.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 5));
-        pnl.setBackground(ColorPalette.BACKGROUND_CONTENT);
-
-        btnThem = createButton("Thêm", ColorPalette.BUTTON_PRIMARY_BG);
-        btnThem.addActionListener(e -> showDialogThem());
-
-        btnSua = createButton("Sửa", ColorPalette.BUTTON_PRIMARY_BG);
-        btnSua.addActionListener(e -> showDialogSua());
-        btnSua.setEnabled(false);
-
-        btnXoa = createButton("Xóa", ColorPalette.BUTTON_DANGER_BG);
-        btnXoa.addActionListener(e -> showDialogXoa());
-        btnXoa.setEnabled(false);
-
-        btnLamMoi = createButton("Làm Mới", ColorPalette.BUTTON_SECONDARY_BG);
-        btnLamMoi.addActionListener(e -> {
-            loadData();
-            txtSearch.setText("");
-        });
-
-        pnl.add(btnThem);
-        pnl.add(btnSua);
-        pnl.add(btnXoa);
-        pnl.add(btnLamMoi);
-
-        return pnl;
-    }
-
-    private JButton createButton(String text, Color bgColor) {
-        JButton btn = new JButton(text);
-        btn.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_BUTTON, Font.BOLD));
-        btn.setBackground(bgColor);
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setBorderPainted(false);
-        btn.setOpaque(true);
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setPreferredSize(new Dimension(100, 35));
-        btn.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                btn.setBackground(ColorPalette.lighten(bgColor, 0.1f));
-            }
-            @Override
-            public void mouseExited(MouseEvent e) {
-                btn.setBackground(bgColor);
-            }
-        });
-        return btn;
     }
 
     private void loadData() {
@@ -182,10 +168,8 @@ public class FrmQuanLyLoaiPhongPanel extends JPanel {
 
     private void updateTable(List<LoaiPhong> list) {
         tableModel.setRowCount(0);
-        int stt = 1;
         for (LoaiPhong loaiPhong : list) {
             tableModel.addRow(new Object[]{
-                stt++,
                 loaiPhong.getMaLoaiPhong(),
                 loaiPhong.getTenLoaiPhong()
             });
@@ -226,7 +210,9 @@ public class FrmQuanLyLoaiPhongPanel extends JPanel {
 
         JPanel pnlButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         pnlButtons.setBackground(ColorPalette.BACKGROUND_CONTENT);
-        JButton btnOk = createButton("Lưu", ColorPalette.BUTTON_PRIMARY_BG);
+        
+        JButton btnOk = ButtonStyle.createPrimaryButton("Lưu");
+        btnOk.setBackground(ColorPalette.BUTTON_SUCCESS_BG);
         btnOk.addActionListener(e -> {
             if (txt.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, "Vui lòng nhập tên loại phòng");
@@ -242,8 +228,9 @@ public class FrmQuanLyLoaiPhongPanel extends JPanel {
             }
         });
         
-        JButton btnCancel = createButton("Hủy", ColorPalette.BUTTON_SECONDARY_BG);
+        JButton btnCancel = ButtonStyle.createSecondaryButton("Hủy");
         btnCancel.addActionListener(e -> dialog.dispose());
+        
         pnlButtons.add(btnOk);
         pnlButtons.add(btnCancel);
         pnl.add(pnlButtons);
@@ -259,8 +246,8 @@ public class FrmQuanLyLoaiPhongPanel extends JPanel {
             return;
         }
 
-        int maLoaiPhong = (int) tableModel.getValueAt(selectedRow, 1);
-        String tenLoaiPhong = (String) tableModel.getValueAt(selectedRow, 2);
+        int maLoaiPhong = (int) tableModel.getValueAt(selectedRow, 0);
+        String tenLoaiPhong = (String) tableModel.getValueAt(selectedRow, 1);
 
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Sửa Loại Phòng", true);
         dialog.setSize(400, 200);
@@ -284,7 +271,9 @@ public class FrmQuanLyLoaiPhongPanel extends JPanel {
 
         JPanel pnlButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         pnlButtons.setBackground(ColorPalette.BACKGROUND_CONTENT);
-        JButton btnOk = createButton("Lưu", ColorPalette.BUTTON_PRIMARY_BG);
+        
+        JButton btnOk = ButtonStyle.createPrimaryButton("Lưu");
+        btnOk.setBackground(ColorPalette.BUTTON_SUCCESS_BG);
         btnOk.addActionListener(e -> {
             if (txt.getText().trim().isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, "Vui lòng nhập tên loại phòng");
@@ -300,8 +289,9 @@ public class FrmQuanLyLoaiPhongPanel extends JPanel {
             }
         });
         
-        JButton btnCancel = createButton("Hủy", ColorPalette.BUTTON_SECONDARY_BG);
+        JButton btnCancel = ButtonStyle.createSecondaryButton("Hủy");
         btnCancel.addActionListener(e -> dialog.dispose());
+        
         pnlButtons.add(btnOk);
         pnlButtons.add(btnCancel);
         pnl.add(pnlButtons);
@@ -317,8 +307,8 @@ public class FrmQuanLyLoaiPhongPanel extends JPanel {
             return;
         }
 
-        int maLoaiPhong = (int) tableModel.getValueAt(selectedRow, 1);
-        String tenLoaiPhong = (String) tableModel.getValueAt(selectedRow, 2);
+        int maLoaiPhong = (int) tableModel.getValueAt(selectedRow, 0);
+        String tenLoaiPhong = (String) tableModel.getValueAt(selectedRow, 1);
 
         int result = JOptionPane.showConfirmDialog(this,
             "Bạn có chắc muốn xóa loại phòng: " + tenLoaiPhong + "?\n(Tất cả phòng thuộc loại này sẽ bị xóa)",

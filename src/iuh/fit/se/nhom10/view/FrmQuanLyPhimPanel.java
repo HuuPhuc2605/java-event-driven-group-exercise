@@ -759,11 +759,12 @@ public class FrmQuanLyPhimPanel extends JPanel {
         int result = JOptionPane.showConfirmDialog(this, "Bạn có chắc muốn xóa phim này?", "Xác nhận", JOptionPane.YES_NO_OPTION);
         
         if (result == JOptionPane.YES_OPTION) {
-            if (phimService.deletePhim(maPhim, adminHienTai)) {
+            String deleteResult = phimService.deletePhim(maPhim, adminHienTai);
+            if ("SUCCESS".equals(deleteResult)) {
                 JOptionPane.showMessageDialog(this, "Xóa phim thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 loadPhimData();
             } else {
-                JOptionPane.showMessageDialog(this, "Xóa phim thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, deleteResult, "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -1015,15 +1016,22 @@ public class FrmQuanLyPhimPanel extends JPanel {
 
                 Phim newPhim = new Phim(maPhim, tenPhim, maTheLoai, thoiLuong, maDD);
                 
+                String result;
                 if (phim == null) {
-                    phimService.addPhim(newPhim, adminHienTai);
+                    result = phimService.addPhim(newPhim, adminHienTai);
                 } else {
-                    phimService.updatePhim(newPhim, adminHienTai);
+                    result = phimService.updatePhim(newPhim, adminHienTai);
                 }
-
-                dialog.dispose();
-                JOptionPane.showMessageDialog(this, "Lưu thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
-                onSuccess.run();
+                
+                if ("SUCCESS".equals(result)) {
+                    dialog.dispose();
+                    JOptionPane.showMessageDialog(this, "Lưu thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                    onSuccess.run();
+                } else {
+                    JOptionPane.showMessageDialog(this, result, "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập số hợp lệ cho thời lượng!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Lỗi: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
             }

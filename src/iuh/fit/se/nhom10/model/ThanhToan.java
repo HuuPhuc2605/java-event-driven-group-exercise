@@ -4,21 +4,18 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
- * Model đại diện cho thanh toán hóa đơn
- * Mỗi hóa đơn có tối đa 1 bản ghi thanh toán
+ * Model đại diện cho Thanh Toán
+ * Lưu thông tin thanh toán cho mỗi hóa đơn
  */
 public class ThanhToan {
-    private String maThanhToan;         // Mã thanh toán (khóa chính)
-    private String maHD;                // Mã hóa đơn (khóa ngoài - unique)
-    private String phuongThuc;          // Phương thức thanh toán (Tiền mặt, Chuyển khoản, Thẻ, v.v.)
-    private LocalDateTime ngayThanhToan; // Ngày và giờ thanh toán
-    private String trangThai;           // Trạng thái (Chưa thanh toán, Đã thanh toán, Hủy, v.v.)
+    private String maThanhToan;           // Mã thanh toán (khóa chính)
+    private String maHD;                  // Mã hóa đơn (khóa ngoài - UNIQUE)
+    private String phuongThuc;            // Phương thức thanh toán (Tiền mặt, MoMo, Banking...)
+    private LocalDateTime ngayThanhToan;  // Ngày thanh toán
+    private String trangThai;             // Trạng thái (Đã thanh toán, Chờ thanh toán, Thất bại...)
 
-    // Constructor không tham số
-    public ThanhToan() {
-    }
+    public ThanhToan() {}
 
-    // Constructor đầy đủ
     public ThanhToan(String maThanhToan, String maHD, String phuongThuc, LocalDateTime ngayThanhToan, String trangThai) {
         this.maThanhToan = maThanhToan;
         this.maHD = maHD;
@@ -27,15 +24,16 @@ public class ThanhToan {
         this.trangThai = trangThai;
     }
 
-    // Constructor cho thêm mới
-    public ThanhToan(String maHD, String phuongThuc, String trangThai) {
+    public ThanhToan(String maThanhToan, String maHD, String phuongThuc, String trangThai) {
+        this.maThanhToan = maThanhToan;
         this.maHD = maHD;
         this.phuongThuc = phuongThuc;
         this.ngayThanhToan = LocalDateTime.now();
         this.trangThai = trangThai;
     }
 
-    // Getters and Setters
+    // ==================== GETTERS AND SETTERS ====================
+
     public String getMaThanhToan() {
         return maThanhToan;
     }
@@ -76,11 +74,6 @@ public class ThanhToan {
         this.trangThai = trangThai;
     }
 
-    // Business methods
-    public boolean isThanhToan() {
-        return "Đã thanh toán".equals(trangThai);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -98,6 +91,9 @@ public class ThanhToan {
     public String toString() {
         return "ThanhToan{" +
                 "maThanhToan='" + maThanhToan + '\'' +
+                ", maHD='" + maHD + '\'' +
+                ", phuongThuc='" + phuongThuc + '\'' +
+                ", ngayThanhToan=" + ngayThanhToan +
                 ", trangThai='" + trangThai + '\'' +
                 '}';
     }

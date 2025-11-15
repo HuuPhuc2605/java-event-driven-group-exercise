@@ -3,6 +3,7 @@ package iuh.fit.se.nhom10.view;
 import iuh.fit.se.nhom10.model.TaiKhoanNhanVien;
 import iuh.fit.se.nhom10.model.Phim;
 import iuh.fit.se.nhom10.service.PhimService;
+import iuh.fit.se.nhom10.service.DashboardService;
 import iuh.fit.se.nhom10.util.ColorPalette;
 import iuh.fit.se.nhom10.util.ButtonStyle;
 
@@ -11,6 +12,7 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -25,9 +27,15 @@ public class FrmAdminMenu extends JFrame {
     private JLabel lblCurrentModule;
     private JPanel pnlDashboard;
     private JButton selectedButton;
+    private DashboardService dashboardService;
 
     public FrmAdminMenu(TaiKhoanNhanVien admin) {
         this.adminHienTai = admin;
+        try {
+            this.dashboardService = new DashboardService();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         setupUI();
         startDateTimeUpdater();
     }
@@ -267,22 +275,16 @@ public class FrmAdminMenu extends JFrame {
         pnl.setBorder(new EmptyBorder(10, 0, 10, 0));
 
         try {
-            // Widget 1: Phim đang chiếu hôm nay
             pnl.add(createMovieShowcaseWidget());
             
-            // Widget 2: Doanh thu hôm nay
             pnl.add(createRevenueWidget());
             
-            // Widget 3: Số vé bán hôm nay
             pnl.add(createTicketsSoldWidget());
             
-            // Widget 4: Tổng số phim
             pnl.add(createTotalMoviesWidget());
             
-            // Widget 5: Thống kê nhanh
             pnl.add(createQuickStatsWidget());
             
-            // Widget 6: Lịch sử gần đây
             pnl.add(createRecentActivityWidget());
             
         } catch (Exception e) {
@@ -344,7 +346,7 @@ public class FrmAdminMenu extends JFrame {
     }
 
     /**
-     * Widget hiển thị doanh thu hôm nay
+     * Widget hiển thị doanh thu hôm nay - từ database
      */
     private JPanel createRevenueWidget() {
         JPanel pnl = new JPanel();
@@ -362,6 +364,16 @@ public class FrmAdminMenu extends JFrame {
         JLabel lblRevenue = new JLabel("0 VNĐ");
         lblRevenue.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_TITLE, Font.BOLD));
         lblRevenue.setForeground(ColorPalette.ACCENT);
+        
+        try {
+            BigDecimal revenue = dashboardService.getRevenueTodayFull();
+            long revenueValue = revenue.longValue();
+            lblRevenue.setText(String.format("%,d VNĐ", revenueValue));
+        } catch (Exception e) {
+            lblRevenue.setText("Lỗi tải");
+            lblRevenue.setForeground(ColorPalette.STATUS_ERROR);
+        }
+        
         pnl.add(lblRevenue);
         pnl.add(Box.createVerticalStrut(5));
 
@@ -375,7 +387,7 @@ public class FrmAdminMenu extends JFrame {
     }
 
     /**
-     * Widget hiển thị số vé bán hôm nay
+     * Widget hiển thị số vé bán hôm nay - từ database
      */
     private JPanel createTicketsSoldWidget() {
         JPanel pnl = new JPanel();
@@ -393,6 +405,15 @@ public class FrmAdminMenu extends JFrame {
         JLabel lblTickets = new JLabel("0");
         lblTickets.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_TITLE, Font.BOLD));
         lblTickets.setForeground(new Color(255, 140, 0));
+        
+        try {
+            long ticketsSold = dashboardService.getTicketsSoldTodayFull();
+            lblTickets.setText(String.valueOf(ticketsSold));
+        } catch (Exception e) {
+            lblTickets.setText("Lỗi");
+            lblTickets.setForeground(ColorPalette.STATUS_ERROR);
+        }
+        
         pnl.add(lblTickets);
         pnl.add(Box.createVerticalStrut(5));
 
@@ -406,7 +427,7 @@ public class FrmAdminMenu extends JFrame {
     }
 
     /**
-     * Widget hiển thị tổng số phim
+     * Widget hiển thị tổng số phim - từ database
      */
     private JPanel createTotalMoviesWidget() {
         JPanel pnl = new JPanel();
@@ -421,26 +442,25 @@ public class FrmAdminMenu extends JFrame {
         pnl.add(lblTitle);
         pnl.add(Box.createVerticalStrut(10));
 
+        JLabel lblCount = new JLabel("0");
+        lblCount.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_TITLE, Font.BOLD));
+        lblCount.setForeground(ColorPalette.PRIMARY);
+        
         try {
-            PhimService phimService = new PhimService();
-            int count = phimService.getAllPhim().size();
-            
-            JLabel lblCount = new JLabel(String.valueOf(count));
-            lblCount.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_TITLE, Font.BOLD));
-            lblCount.setForeground(ColorPalette.PRIMARY);
-            pnl.add(lblCount);
+            int totalMovies = dashboardService.getTotalMovies();
+            lblCount.setText(String.valueOf(totalMovies));
         } catch (Exception e) {
-            JLabel lblError = new JLabel("0");
-            lblError.setForeground(ColorPalette.STATUS_ERROR);
-            pnl.add(lblError);
+            lblCount.setText("0");
+            lblCount.setForeground(ColorPalette.STATUS_ERROR);
         }
-
+        
+        pnl.add(lblCount);
         pnl.add(Box.createVerticalGlue());
         return pnl;
     }
 
     /**
-     * Widget thống kê nhanh
+     * Widget thống kê nhanh - từ database
      */
     private JPanel createQuickStatsWidget() {
         JPanel pnl = new JPanel();
@@ -455,13 +475,28 @@ public class FrmAdminMenu extends JFrame {
         pnl.add(lblTitle);
         pnl.add(Box.createVerticalStrut(10));
 
-        String[] stats = {"Phòng: 5", "Nhân viên: 10", "Thể loại: 8"};
-        for (String stat : stats) {
-            JLabel lbl = new JLabel("• " + stat);
-            lbl.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL, Font.PLAIN));
-            lbl.setForeground(ColorPalette.TEXT_BODY);
-            pnl.add(lbl);
-            pnl.add(Box.createVerticalStrut(5));
+        try {
+            int totalScreens = dashboardService.getTotalScreens();
+            int totalEmployees = dashboardService.getTotalEmployees();
+            int totalCustomers = dashboardService.getTotalCustomers();
+            
+            String[] stats = {
+                "Phòng: " + totalScreens,
+                "Nhân viên: " + totalEmployees,
+                "Khách hàng: " + totalCustomers
+            };
+            
+            for (String stat : stats) {
+                JLabel lbl = new JLabel("• " + stat);
+                lbl.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL, Font.PLAIN));
+                lbl.setForeground(ColorPalette.TEXT_BODY);
+                pnl.add(lbl);
+                pnl.add(Box.createVerticalStrut(5));
+            }
+        } catch (Exception e) {
+            JLabel lblError = new JLabel("Lỗi tải dữ liệu");
+            lblError.setForeground(ColorPalette.STATUS_ERROR);
+            pnl.add(lblError);
         }
 
         pnl.add(Box.createVerticalGlue());
@@ -564,10 +599,51 @@ public class FrmAdminMenu extends JFrame {
                 break;
             case "khuyen_mai":
                 try {
-                    FrmQuanLyKhuyenMaiPanel pnlQuanLyKhuyenMai = new FrmQuanLyKhuyenMaiPanel(adminHienTai);
-                    pnlContentArea.add(pnlQuanLyKhuyenMai, BorderLayout.CENTER);
+                    // Load FrmQuanLyPhongChieuPanel as content panel
+                    FrmQuanLyKhuyenMaiPanel pnlQuanLyKhuyenMaiPanel = new FrmQuanLyKhuyenMaiPanel(adminHienTai);
+                    pnlContentArea.add(pnlQuanLyKhuyenMaiPanel, BorderLayout.CENTER);
                 } catch (Exception e) {
-                    JLabel lblError = new JLabel("Lỗi tải trang quản lý khuyến mãi: " + e.getMessage());
+                    JLabel lblError = new JLabel("Lỗi tải trang quản lý khuyến mại: " + e.getMessage());
+                    lblError.setForeground(ColorPalette.STATUS_ERROR);
+                    pnlContentArea.add(lblError, BorderLayout.CENTER);
+                }
+                break;
+            case "nhan_vien":
+                try {
+                    FrmQuanLyNhanVienPanel pnlQuanLyNhanVien = new FrmQuanLyNhanVienPanel(adminHienTai);
+                    pnlContentArea.add(pnlQuanLyNhanVien, BorderLayout.CENTER);
+                } catch (Exception e) {
+                    JLabel lblError = new JLabel("Lỗi tải trang quản lý nhân viên: " + e.getMessage());
+                    lblError.setForeground(ColorPalette.STATUS_ERROR);
+                    pnlContentArea.add(lblError, BorderLayout.CENTER);
+                }
+                break;
+            case "khach_hang":
+                try {
+                    FrmQuanLyKhachHangPanel pnlQuanLyKhachHang = new FrmQuanLyKhachHangPanel(adminHienTai);
+                    pnlContentArea.add(pnlQuanLyKhachHang, BorderLayout.CENTER);
+                } catch (Exception e) {
+                    JLabel lblError = new JLabel("Lỗi tải trang quản lý khách hàng: " + e.getMessage());
+                    lblError.setForeground(ColorPalette.STATUS_ERROR);
+                    pnlContentArea.add(lblError, BorderLayout.CENTER);
+                }
+                break;
+            case "hoa_don":
+                try {
+                    FrmQuanLyHoaDonPanel pnlQuanLyHoaDon = new FrmQuanLyHoaDonPanel(adminHienTai);
+                    pnlContentArea.add(pnlQuanLyHoaDon, BorderLayout.CENTER);
+                } catch (Exception e) {
+                    JLabel lblError = new JLabel("Lỗi tải trang quản lý hóa đơn: " + e.getMessage());
+                    lblError.setForeground(ColorPalette.STATUS_ERROR);
+                    pnlContentArea.add(lblError, BorderLayout.CENTER);
+                }
+                break;
+            case "bao_cao":
+                try {
+                    FrmQuanLyBaoCaoPanel pnlBaoCao = new FrmQuanLyBaoCaoPanel(adminHienTai);
+                    pnlContentArea.add(pnlBaoCao, BorderLayout.CENTER);
+                } catch (Exception e) {
+                    JLabel lblError = new JLabel("Lỗi tải trang báo cáo: " + e.getMessage());
                     lblError.setForeground(ColorPalette.STATUS_ERROR);
                     pnlContentArea.add(lblError, BorderLayout.CENTER);
                 }
@@ -601,9 +677,29 @@ public class FrmAdminMenu extends JFrame {
         btnLogout.setBackground(ColorPalette.BUTTON_DANGER_BG);
         btnLogout.setForeground(Color.WHITE);
         btnLogout.setFocusPainted(false);
-//        btnLogout.setCursor(new Cursor(Cursor.HAND_CURSOR));
-//        btnLogout.setContentAreaFilled(true);
-//        btnLogout.setOpaque(true);
+        btnLogout.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnLogout.setContentAreaFilled(true);
+        btnLogout.setOpaque(true);
+        btnLogout.setBorderPainted(false);
+        btnLogout.setPreferredSize(new Dimension(100, 40));
+        btnLogout.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                btnLogout.setBackground(ColorPalette.BUTTON_DANGER_BG_HOVER);
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                btnLogout.setBackground(ColorPalette.BUTTON_DANGER_BG);
+            }
+            @Override
+            public void mousePressed(MouseEvent e) {
+                btnLogout.setBackground(ColorPalette.BUTTON_DANGER_BG_PRESS);
+            }
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                btnLogout.setBackground(ColorPalette.BUTTON_DANGER_BG);
+            }
+        });
         btnLogout.addActionListener(e -> handleLogout());
 
         JLabel lblCopyright = new JLabel("© 2025 Nhóm 10 - Hệ Thống Quản Lý Rạp Chiếu Phim");
@@ -618,7 +714,7 @@ public class FrmAdminMenu extends JFrame {
     }
 
     /**
-     * Xử lý đăng xuất
+     * Xử lý đăng xuất - Đóng frame hiện tại và mở login
      */
     private void handleLogout() {
         int result = JOptionPane.showConfirmDialog(this,
@@ -628,8 +724,8 @@ public class FrmAdminMenu extends JFrame {
         
         if (result == JOptionPane.YES_OPTION) {
             try {
+                this.dispose(); // Đóng frame admin trước
                 new FrmDangNhap().setVisible(true);
-                this.dispose();
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, 
                     "Lỗi: " + e.getMessage(), 

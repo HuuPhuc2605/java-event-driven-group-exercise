@@ -12,6 +12,8 @@ public class HoaDon {
     private String maHD;                // Mã hóa đơn (khóa chính)
     private LocalDateTime ngayLap;      // Ngày lập hóa đơn
     private BigDecimal tongTien;        // Tổng tiền của hóa đơn
+    private BigDecimal giamGia;         // Giảm giá
+    private BigDecimal thanhToan;       // Tiền thanh toán
     private String maNV;                // Mã nhân viên lập hóa đơn (khóa ngoài - bắt buộc)
     private String maKH;                // Mã khách hàng (khóa ngoài - có thể null)
     private String maKM;                // Mã khuyến mãi (khóa ngoài - có thể null)
@@ -25,10 +27,12 @@ public class HoaDon {
     /**
      * Constructor đầy đủ
      */
-    public HoaDon(String maHD, LocalDateTime ngayLap, BigDecimal tongTien, String maNV, String maKH, String maKM) {
+    public HoaDon(String maHD, LocalDateTime ngayLap, BigDecimal tongTien, BigDecimal giamGia, BigDecimal thanhToan, String maNV, String maKH, String maKM) {
         this.maHD = maHD;
         this.ngayLap = ngayLap;
         this.tongTien = tongTien;
+        this.giamGia = giamGia;
+        this.thanhToan = thanhToan;
         this.maNV = maNV;
         this.maKH = maKH;
         this.maKM = maKM;
@@ -38,10 +42,12 @@ public class HoaDon {
      * Constructor với tham số cơ bản
      * NgayLap sẽ được set thành thời gian hiện tại
      */
-    public HoaDon(String maHD, BigDecimal tongTien, String maNV, String maKH, String maKM) {
+    public HoaDon(String maHD, BigDecimal tongTien, BigDecimal giamGia, BigDecimal thanhToan, String maNV, String maKH, String maKM) {
         this.maHD = maHD;
         this.ngayLap = LocalDateTime.now();
         this.tongTien = tongTien;
+        this.giamGia = giamGia;
+        this.thanhToan = thanhToan;
         this.maNV = maNV;
         this.maKH = maKH;
         this.maKM = maKM;
@@ -50,8 +56,8 @@ public class HoaDon {
     /**
      * Constructor cho trường hợp lập hóa đơn không có khuyến mãi
      */
-    public HoaDon(String maHD, BigDecimal tongTien, String maNV, String maKH) {
-        this(maHD, tongTien, maNV, maKH, null);
+    public HoaDon(String maHD, BigDecimal tongTien, BigDecimal giamGia, BigDecimal thanhToan, String maNV, String maKH) {
+        this(maHD, tongTien, giamGia, thanhToan, maNV, maKH, null);
     }
 
     // ==================== GETTERS AND SETTERS ====================
@@ -78,6 +84,22 @@ public class HoaDon {
 
     public void setTongTien(BigDecimal tongTien) {
         this.tongTien = tongTien;
+    }
+
+    public BigDecimal getGiamGia() {
+        return giamGia;
+    }
+
+    public void setGiamGia(BigDecimal giamGia) {
+        this.giamGia = giamGia;
+    }
+
+    public BigDecimal getThanhToan() {
+        return thanhToan;
+    }
+
+    public void setThanhToan(BigDecimal thanhToan) {
+        this.thanhToan = thanhToan;
     }
 
     public String getMaNV() {
@@ -143,6 +165,8 @@ public class HoaDon {
                 "maHD='" + maHD + '\'' +
                 ", ngayLap=" + ngayLap +
                 ", tongTien=" + tongTien +
+                ", giamGia=" + giamGia +
+                ", thanhToan=" + thanhToan +
                 ", maNV='" + maNV + '\'' +
                 ", maKH='" + maKH + '\'' +
                 ", maKM='" + maKM + '\'' +

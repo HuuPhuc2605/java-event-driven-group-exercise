@@ -11,7 +11,9 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.*;
 import java.sql.SQLException;
+import java.util.prefs.Preferences;
 
 /**
  * Form đăng nhập admin - Thiết kế chuyên nghiệp
@@ -26,10 +28,16 @@ public class FrmDangNhap extends JFrame {
     
     private TaiKhoanNhanVienService service;
     private TaiKhoanNhanVien adminHienTai;
+    
+    private static final String PREF_USERNAME = "username";
+    private static final String PREF_PASSWORD = "password";
+    private static final String PREF_REMEMBER = "remember";
+    private Preferences prefs = Preferences.userNodeForPackage(FrmDangNhap.class);
 
     public FrmDangNhap() throws SQLException {
         service = new TaiKhoanNhanVienService();
         setupUI();
+        loadSavedCredentials();
     }
 
     /**
@@ -222,12 +230,48 @@ public class FrmDangNhap extends JFrame {
         });
     }
 
+    private void loadSavedCredentials() {
+        boolean remember = prefs.getBoolean(PREF_REMEMBER, false);
+        if (remember) {
+            String savedUsername = prefs.get(PREF_USERNAME, "");
+            String savedPassword = prefs.get(PREF_PASSWORD, "");
+            
+            if (!savedUsername.isEmpty() && !savedPassword.isEmpty()) {
+                txtTenDangNhap.setText(savedUsername);
+                txtMatKhau.setText(savedPassword);
+                chkGhiNho.setSelected(true);
+                lblThongBao.setText("Thông tin đã được khôi phục");
+                lblThongBao.setForeground(ColorPalette.STATUS_INFO);
+            }
+        }
+    }
+
+    private void saveCredentials() {
+        if (chkGhiNho.isSelected()) {
+            String tenDangNhap = txtTenDangNhap.getText().trim();
+            String matKhau = new String(txtMatKhau.getPassword());
+            
+            prefs.put(PREF_USERNAME, tenDangNhap);
+            prefs.put(PREF_PASSWORD, matKhau);
+            prefs.putBoolean(PREF_REMEMBER, true);
+        } else {
+            // Nếu checkbox không được tích, xóa thông tin đã lưu
+            prefs.remove(PREF_USERNAME);
+            prefs.remove(PREF_PASSWORD);
+            prefs.putBoolean(PREF_REMEMBER, false);
+        }
+    }
+
     /**
      * Handle username change - autocomplete password
      * Khi người dùng nhập username, tự động lấy mật khẩu từ CSDL và gợi ý
      */
     private void handleUsernameChange() {
         String tenDangNhap = txtTenDangNhap.getText().trim();
+        
+        if (!chkGhiNho.isSelected()) {
+            return;
+        }
         
         // Nếu username rỗng, xóa password
         if (tenDangNhap.isEmpty()) {
@@ -279,6 +323,8 @@ public class FrmDangNhap extends JFrame {
         adminHienTai = service.authenticateAdmin(tenDangNhap, matKhau);
 
         if (adminHienTai != null) {
+            saveCredentials();
+            
             // Đăng nhập thành công
             lblThongBao.setText("✓ Đăng nhập thành công! Chào " + adminHienTai.getNhanVien().getTenNV());
             lblThongBao.setForeground(ColorPalette.STATUS_SUCCESS);

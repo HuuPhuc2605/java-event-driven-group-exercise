@@ -20,73 +20,95 @@ public class PhimService {
 
     /**
      * Thêm phim mới - chỉ admin
+     * Return custom error messages instead of just false
      */
-    public boolean addPhim(Phim phim, TaiKhoanNhanVien taiKhoan) {
+    public String addPhim(Phim phim, TaiKhoanNhanVien taiKhoan) {
         // Kiểm tra quyền admin
         if (taiKhoan == null || !"Admin".equalsIgnoreCase(taiKhoan.getVaiTro())) {
-            System.out.println("Chỉ admin mới có quyền thêm phim!");
-            return false;
+            return "Chỉ admin mới có quyền thêm phim!";
         }
         
         // Kiểm tra validation
         if (phim.getMaPhim() == null || phim.getMaPhim().trim().isEmpty()) {
-            System.out.println("Mã phim không được để trống!");
-            return false;
+            return "Mã phim không được để trống!";
         }
         
         if (phim.getTenPhim() == null || phim.getTenPhim().trim().isEmpty()) {
-            System.out.println("Tên phim không được để trống!");
-            return false;
+            return "Tên phim không được để trống!";
         }
         
         if (phim.getThoiLuong() <= 0) {
-            System.out.println("Thời lượng phim phải > 0!");
-            return false;
+            return "Thời lượng phim phải lớn hơn 0!";
         }
         
         if (dao.getPhimByMa(phim.getMaPhim()) != null) {
-            System.out.println("Mã phim đã tồn tại!");
-            return false;
+            return "Mã phim đã tồn tại!";
         }
         
-        return dao.createPhim(phim);
+        if (phim.getMaTheLoai() <= 0) {
+            return "Thể loại không hợp lệ!";
+        }
+        
+        if (phim.getMaDD() == null || phim.getMaDD().trim().isEmpty()) {
+            return "Đạo diễn không hợp lệ!";
+        }
+        
+        if (dao.createPhim(phim)) {
+            return "SUCCESS";
+        } else {
+            return "Lỗi khi thêm phim vào cơ sở dữ liệu!";
+        }
     }
 
     /**
      * Sửa phim - chỉ admin
+     * Return custom error messages instead of just false
      */
-    public boolean updatePhim(Phim phim, TaiKhoanNhanVien taiKhoan) {
+    public String updatePhim(Phim phim, TaiKhoanNhanVien taiKhoan) {
         // Kiểm tra quyền admin
         if (taiKhoan == null || !"Admin".equalsIgnoreCase(taiKhoan.getVaiTro())) {
-            System.out.println("Chỉ admin mới có quyền sửa phim!");
-            return false;
+            return "Chỉ admin mới có quyền sửa phim!";
         }
         
         // Kiểm tra validation
         if (phim.getTenPhim() == null || phim.getTenPhim().trim().isEmpty()) {
-            System.out.println("Tên phim không được để trống!");
-            return false;
+            return "Tên phim không được để trống!";
         }
         
         if (phim.getThoiLuong() <= 0) {
-            System.out.println("Thời lượng phim phải > 0!");
-            return false;
+            return "Thời lượng phim phải lớn hơn 0!";
         }
         
-        return dao.updatePhim(phim);
+        if (phim.getMaTheLoai() <= 0) {
+            return "Thể loại không hợp lệ!";
+        }
+        
+        if (phim.getMaDD() == null || phim.getMaDD().trim().isEmpty()) {
+            return "Đạo diễn không hợp lệ!";
+        }
+        
+        if (dao.updatePhim(phim)) {
+            return "SUCCESS";
+        } else {
+            return "Lỗi khi cập nhật phim!";
+        }
     }
 
     /**
      * Xóa phim - chỉ admin
+     * Return custom error messages
      */
-    public boolean deletePhim(String maPhim, TaiKhoanNhanVien taiKhoan) {
+    public String deletePhim(String maPhim, TaiKhoanNhanVien taiKhoan) {
         // Kiểm tra quyền admin
         if (taiKhoan == null || !"Admin".equalsIgnoreCase(taiKhoan.getVaiTro())) {
-            System.out.println("Chỉ admin mới có quyền xóa phim!");
-            return false;
+            return "Chỉ admin mới có quyền xóa phim!";
         }
         
-        return dao.deletePhim(maPhim);
+        if (dao.deletePhim(maPhim)) {
+            return "SUCCESS";
+        } else {
+            return "Lỗi khi xóa phim!";
+        }
     }
 
     /**
