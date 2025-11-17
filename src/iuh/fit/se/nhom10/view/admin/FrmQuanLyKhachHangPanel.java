@@ -1,4 +1,4 @@
-package iuh.fit.se.nhom10.view;
+package iuh.fit.se.nhom10.view.admin;
 
 import iuh.fit.se.nhom10.model.TaiKhoanNhanVien;
 import iuh.fit.se.nhom10.model.KhachHang;
@@ -278,6 +278,29 @@ public class FrmQuanLyKhachHangPanel extends JPanel {
         btnLuu.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnLuu.addActionListener(e -> {
             try {
+                if (txtMaKH.getText().trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(dialog, "Mã khách hàng không được để trống!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (txtTenKH.getText().trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(dialog, "Tên khách hàng không được để trống!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (txtSDT.getText().trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(dialog, "Số điện thoại không được để trống!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (!txtSDT.getText().trim().matches("^\\d{10}$")) {
+                    JOptionPane.showMessageDialog(dialog, "Số điện thoại phải đúng 10 chữ số!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                // Check for duplicate mã khách hàng when adding new
+                if (kh == null && khachHangDAO.isKhachHangExists(txtMaKH.getText().trim())) {
+                    JOptionPane.showMessageDialog(dialog, "Mã khách hàng này đã tồn tại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
                 KhachHang newKH = new KhachHang(
                     txtMaKH.getText().trim(),
                     txtTenKH.getText().trim(),

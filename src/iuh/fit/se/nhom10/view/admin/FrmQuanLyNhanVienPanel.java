@@ -1,8 +1,10 @@
-package iuh.fit.se.nhom10.view;
+package iuh.fit.se.nhom10.view.admin;
 
 import iuh.fit.se.nhom10.model.TaiKhoanNhanVien;
 import iuh.fit.se.nhom10.model.NhanVien;
+import iuh.fit.se.nhom10.model.ChucVu;
 import iuh.fit.se.nhom10.dao.NhanVienDAO;
+import iuh.fit.se.nhom10.dao.ChucVuDAO;
 import iuh.fit.se.nhom10.dao.TaiKhoanNhanVienDAO;
 import iuh.fit.se.nhom10.util.ColorPalette;
 
@@ -21,6 +23,7 @@ public class FrmQuanLyNhanVienPanel extends JPanel {
     private TaiKhoanNhanVien adminHienTai;
     private NhanVienDAO nhanVienDAO;
     private TaiKhoanNhanVienDAO taiKhoanDAO;
+    private ChucVuDAO chucVuDAO;
     
     private JTabbedPane tabbedPane;
     private JTable tblNhanVien;
@@ -35,6 +38,7 @@ public class FrmQuanLyNhanVienPanel extends JPanel {
         this.adminHienTai = admin;
         this.nhanVienDAO = new NhanVienDAO();
         this.taiKhoanDAO = new TaiKhoanNhanVienDAO();
+        this.chucVuDAO = new ChucVuDAO();
         setupUI();
         loadAllData();
     }
@@ -238,7 +242,7 @@ public class FrmQuanLyNhanVienPanel extends JPanel {
 
     private void showNhanVienDialog(NhanVien nv) {
         JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(this), nv == null ? "Thêm Nhân Viên" : "Sửa Nhân Viên");
-        dialog.setSize(550, 450);
+        dialog.setSize(550, 500);
         dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
@@ -270,18 +274,27 @@ public class FrmQuanLyNhanVienPanel extends JPanel {
 
         JLabel lblChucVu = new JLabel("Chức Vụ:");
         lblChucVu.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL + 2, Font.BOLD));
-        JSpinner spinChucVu = new JSpinner(new SpinnerNumberModel(1, 1, 10, 1));
-        spinChucVu.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        JComboBox<String> cboChucVu = new JComboBox<>();
+        cboChucVu.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        cboChucVu.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_INPUT, Font.PLAIN));
+        
+        List<ChucVu> listChucVu = null;
+        try {
+            listChucVu = chucVuDAO.getAllChucVu();
+            for (ChucVu cv : listChucVu) {
+                cboChucVu.addItem(cv.getMaChucVu() + "|" + cv.getTenChucVu());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         JLabel lblLuong = new JLabel("Lương:");
         lblLuong.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL + 2, Font.BOLD));
-        JTextField txtLuong = new JTextField();
-        txtLuong.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        txtLuong.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_INPUT, Font.PLAIN));
-        txtLuong.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(ColorPalette.BORDER_INPUT, 1),
-            BorderFactory.createEmptyBorder(8, 10, 8, 10)
-        ));
+        JSpinner spinLuong = new JSpinner(new SpinnerNumberModel(5000000.0, 1000000.0, 100000000.0, 100000.0));
+        spinLuong.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        spinLuong.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_INPUT, Font.PLAIN));
+        
+        // Removed the empty JFormattedTextField editor that was breaking the spinner buttons
 
         JLabel lblSDT = new JLabel("Số Điện Thoại:");
         lblSDT.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL + 2, Font.BOLD));
@@ -296,9 +309,16 @@ public class FrmQuanLyNhanVienPanel extends JPanel {
         if (nv != null) {
             txtMaNV.setText(nv.getMaNV());
             txtTenNV.setText(nv.getTenNV());
-            spinChucVu.setValue(nv.getMaChucVu());
-            txtLuong.setText(nv.getLuong().toPlainString());
+            spinLuong.setValue(nv.getLuong().doubleValue());
             txtSDT.setText(nv.getSoDienThoai() != null ? nv.getSoDienThoai() : "");
+            
+            String selectedChucVu = nv.getMaChucVu() + "|";
+            for (int i = 0; i < cboChucVu.getItemCount(); i++) {
+                if (cboChucVu.getItemAt(i).startsWith(selectedChucVu)) {
+                    cboChucVu.setSelectedIndex(i);
+                    break;
+                }
+            }
         }
 
         pnl.add(lblMaNV);
@@ -308,10 +328,10 @@ public class FrmQuanLyNhanVienPanel extends JPanel {
         pnl.add(txtTenNV);
         pnl.add(Box.createVerticalStrut(12));
         pnl.add(lblChucVu);
-        pnl.add(spinChucVu);
+        pnl.add(cboChucVu);
         pnl.add(Box.createVerticalStrut(12));
         pnl.add(lblLuong);
-        pnl.add(txtLuong);
+        pnl.add(spinLuong);
         pnl.add(Box.createVerticalStrut(12));
         pnl.add(lblSDT);
         pnl.add(txtSDT);
@@ -330,25 +350,69 @@ public class FrmQuanLyNhanVienPanel extends JPanel {
         btnLuu.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnLuu.addActionListener(e -> {
             try {
+                if (txtMaNV.getText().trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(dialog, "Mã nhân viên không được để trống!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (txtTenNV.getText().trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(dialog, "Tên nhân viên không được để trống!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (txtSDT.getText().trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(dialog, "Số điện thoại không được để trống!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (!txtSDT.getText().trim().matches("^\\d{10}$")) {
+                    JOptionPane.showMessageDialog(dialog, "Số điện thoại phải đúng 10 chữ số!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                // Check for duplicate mã nhân viên when adding new
+                if (nv == null && nhanVienDAO.isNhanVienExists(txtMaNV.getText().trim())) {
+                    JOptionPane.showMessageDialog(dialog, "Mã nhân viên này đã tồn tại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                String selectedItem = (String) cboChucVu.getSelectedItem();
+                int maChucVu = Integer.parseInt(selectedItem.split("\\|")[0]);
+                
+                Object luongValue = spinLuong.getValue();
+                BigDecimal luong;
+                if (luongValue instanceof Double) {
+                    luong = new BigDecimal((Double) luongValue);
+                } else if (luongValue instanceof Long) {
+                    luong = new BigDecimal((Long) luongValue);
+                } else {
+                    luong = new BigDecimal(luongValue.toString());
+                }
+                
                 NhanVien newNV = new NhanVien(
                     txtMaNV.getText().trim(),
                     txtTenNV.getText().trim(),
-                    (int) spinChucVu.getValue(),
-                    new BigDecimal(txtLuong.getText().trim()),
+                    maChucVu,
+                    luong,
                     txtSDT.getText().trim()
                 );
 
                 if (nv == null) {
                     nhanVienDAO.createNhanVien(newNV);
+                    JOptionPane.showMessageDialog(FrmQuanLyNhanVienPanel.this, "Thêm nhân viên thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 } else {
                     nhanVienDAO.updateNhanVien(newNV);
+                    JOptionPane.showMessageDialog(FrmQuanLyNhanVienPanel.this, "Cập nhật nhân viên thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 }
 
                 dialog.dispose();
-                JOptionPane.showMessageDialog(FrmQuanLyNhanVienPanel.this, "Lưu thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 loadNhanVienData();
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(FrmQuanLyNhanVienPanel.this, "Lương phải là số!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(FrmQuanLyNhanVienPanel.this, "Lỗi: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+                String errorMsg = ex.getMessage();
+                if (errorMsg != null && errorMsg.toLowerCase().contains("primary key")) {
+                    JOptionPane.showMessageDialog(FrmQuanLyNhanVienPanel.this, "Lỗi: Tài khoản/Nhân viên này đã tồn tại. Vui lòng kiểm tra lại dữ liệu!", "Lỗi Trùng Dữ Liệu", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(FrmQuanLyNhanVienPanel.this, "Lỗi: " + errorMsg, "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 
@@ -636,6 +700,25 @@ public class FrmQuanLyNhanVienPanel extends JPanel {
         btnLuu.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnLuu.addActionListener(e -> {
             try {
+                if (txtTenDN.getText().trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(dialog, "Tên đăng nhập không được để trống!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (new String(txtMatKhau.getPassword()).trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(dialog, "Mật khẩu không được để trống!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (new String(txtMatKhau.getPassword()).trim().length() < 6) {
+                    JOptionPane.showMessageDialog(dialog, "Mật khẩu phải ít nhất 6 ký tự!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                // Check for duplicate tên đăng nhập when adding new
+                if (tk == null && taiKhoanDAO.isTenDangNhapExists(txtTenDN.getText().trim())) {
+                    JOptionPane.showMessageDialog(dialog, "Tên đăng nhập này đã tồn tại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
                 String maNV = ((String) cboMaNV.getSelectedItem()).split(" - ")[0];
                 TaiKhoanNhanVien newTK = new TaiKhoanNhanVien(
                     txtTenDN.getText().trim(),
@@ -647,14 +730,19 @@ public class FrmQuanLyNhanVienPanel extends JPanel {
                 if (tk == null) {
                     taiKhoanDAO.createTaiKhoan(newTK);
                 } else {
-                    taiKhoanDAO.createTaiKhoan(newTK);
+                    taiKhoanDAO.updateTaiKhoan(newTK);
                 }
 
                 dialog.dispose();
                 JOptionPane.showMessageDialog(FrmQuanLyNhanVienPanel.this, "Lưu thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
                 loadTaiKhoanData();
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(FrmQuanLyNhanVienPanel.this, "Lỗi: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+                String errorMsg = ex.getMessage();
+                if (errorMsg != null && errorMsg.toLowerCase().contains("primary key")) {
+                    JOptionPane.showMessageDialog(FrmQuanLyNhanVienPanel.this, "Lỗi: Tên đăng nhập này đã tồn tại! Vui lòng chọn tên đăng nhập khác.", "Lỗi Trùng Tên Đăng Nhập", JOptionPane.ERROR_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(FrmQuanLyNhanVienPanel.this, "Lỗi: " + errorMsg, "Lỗi", JOptionPane.ERROR_MESSAGE);
+                }
             }
         });
 
@@ -686,10 +774,13 @@ public class FrmQuanLyNhanVienPanel extends JPanel {
         try {
             List<NhanVien> list = nhanVienDAO.getAllNhanVien();
             for (NhanVien nv : list) {
+                ChucVu cv = chucVuDAO.getChucVuByMa(nv.getMaChucVu());
+                String tenChucVu = cv != null ? cv.getTenChucVu() : "N/A";
+                
                 modelNhanVien.addRow(new Object[]{
                     nv.getMaNV(),
                     nv.getTenNV(),
-                    nv.getMaChucVu(),
+                    tenChucVu,
                     nv.getLuong().toPlainString() + " VNĐ",
                     nv.getSoDienThoai() != null ? nv.getSoDienThoai() : "N/A"
                 });
@@ -729,10 +820,13 @@ public class FrmQuanLyNhanVienPanel extends JPanel {
             List<NhanVien> list = nhanVienDAO.getAllNhanVien();
             for (NhanVien nv : list) {
                 if (nv.getMaNV().toLowerCase().contains(keyword) || nv.getTenNV().toLowerCase().contains(keyword)) {
+                    ChucVu cv = chucVuDAO.getChucVuByMa(nv.getMaChucVu());
+                    String tenChucVu = cv != null ? cv.getTenChucVu() : "N/A";
+                    
                     modelNhanVien.addRow(new Object[]{
                         nv.getMaNV(),
                         nv.getTenNV(),
-                        nv.getMaChucVu(),
+                        tenChucVu,
                         nv.getLuong().toPlainString() + " VNĐ",
                         nv.getSoDienThoai() != null ? nv.getSoDienThoai() : "N/A"
                     });

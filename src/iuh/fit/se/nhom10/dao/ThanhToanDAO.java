@@ -2,7 +2,6 @@ package iuh.fit.se.nhom10.dao;
 
 import iuh.fit.se.nhom10.model.ThanhToan;
 import iuh.fit.se.nhom10.util.KetNoi;
-import iuh.fit.se.nhom10.util.KetNoi;
 
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -13,7 +12,7 @@ public class ThanhToanDAO {
     private Connection connection;
 
     public ThanhToanDAO() throws SQLException {
-    	this.connection = KetNoi.getInstance().getConnection();
+        this.connection = KetNoi.getInstance().getConnection();
     }
 
     public List<ThanhToan> getAllThanhToan() throws SQLException {
@@ -87,6 +86,21 @@ public class ThanhToanDAO {
         }
     }
 
+    public String getNextThanhToanId() throws SQLException {
+        String sql = "SELECT MAX(CAST(SUBSTRING(maThanhToan, 3) AS INT)) as maxNum FROM ThanhToan WHERE maThanhToan LIKE 'TT%'";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            int nextNum = 1;
+            if (rs.next()) {
+                int maxNum = rs.getInt("maxNum");
+                if (maxNum > 0) {
+                    nextNum = maxNum + 1;
+                }
+            }
+            return String.format("TT%03d", nextNum);
+        }
+    }
+
     private ThanhToan mapResultSetToThanhToan(ResultSet rs) throws SQLException {
         String maThanhToan = rs.getString("maThanhToan");
         String maHD = rs.getString("maHD");
@@ -96,5 +110,20 @@ public class ThanhToanDAO {
         String trangThai = rs.getString("trangThai");
         
         return new ThanhToan(maThanhToan, maHD, phuongThuc, ngayThanhToan, trangThai);
+    }
+
+    public List<ThanhToan> getThanhToanByMaHD(String maHD) throws SQLException {
+        List<ThanhToan> list = new ArrayList<>();
+        String sql = "SELECT * FROM ThanhToan WHERE maHD = ?";
+        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+            pstmt.setString(1, maHD);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    ThanhToan tt = mapResultSetToThanhToan(rs);
+                    list.add(tt);
+                }
+            }
+        }
+        return list;
     }
 }

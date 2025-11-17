@@ -1,4 +1,4 @@
-package iuh.fit.se.nhom10.view;
+package iuh.fit.se.nhom10.view.admin;
 
 import iuh.fit.se.nhom10.model.TaiKhoanNhanVien;
 import iuh.fit.se.nhom10.model.HoaDon;

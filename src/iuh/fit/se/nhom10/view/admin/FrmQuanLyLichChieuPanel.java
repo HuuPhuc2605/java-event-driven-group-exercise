@@ -1,4 +1,4 @@
-package iuh.fit.se.nhom10.view;
+package iuh.fit.se.nhom10.view.admin;
 
 import iuh.fit.se.nhom10.model.TaiKhoanNhanVien;
 import iuh.fit.se.nhom10.model.LichChieu;
@@ -434,7 +434,7 @@ public class FrmQuanLyLichChieuPanel extends JPanel {
         pnlNgayChieu.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
         
         java.util.Date today = new java.util.Date();
-        JSpinner spinNgayChieu = new JSpinner(new SpinnerDateModel(today, null, null, java.util.Calendar.DAY_OF_MONTH));
+        JSpinner spinNgayChieu = new JSpinner(new SpinnerDateModel(today, today, null, java.util.Calendar.DAY_OF_MONTH));
         JSpinner.DateEditor editorNgay = new JSpinner.DateEditor(spinNgayChieu, "yyyy-MM-dd");
         spinNgayChieu.setEditor(editorNgay);
         spinNgayChieu.setPreferredSize(new Dimension(200, 38));
@@ -583,6 +583,16 @@ public class FrmQuanLyLichChieuPanel extends JPanel {
                 String phongStr = (String) cboPhong.getSelectedItem();
                 String maPhim = phimStr.split(" - ")[0];
                 String maPhong = phongStr.split(" - ")[0];
+                
+                if (maLich.isEmpty()) {
+                    JOptionPane.showMessageDialog(dialog, "Mã lịch không được để trống!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                if (lichChieu == null && lichChieuDAO.isLichChieuExists(maLich)) {
+                    JOptionPane.showMessageDialog(dialog, "Mã lịch '" + maLich + "' đã tồn tại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
                 
                 java.util.Date ngayChieuUtil = (java.util.Date) spinNgayChieu.getValue();
                 java.util.Date gioBatDauUtil = (java.util.Date) spinGioBatDau.getValue();

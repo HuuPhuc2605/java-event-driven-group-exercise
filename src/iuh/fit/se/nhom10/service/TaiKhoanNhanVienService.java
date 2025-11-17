@@ -44,39 +44,39 @@ public class TaiKhoanNhanVienService {
     }
 
     /**
-     * Kiểm tra xem tài khoản đã tồn tại chưa
+     * add validation for username existence
      */
     public boolean isUsernameExists(String tenDangNhap) {
-        return dao.getTaiKhoanByUsername(tenDangNhap) != null;
+        return dao.isTenDangNhapExists(tenDangNhap);
     }
 
     /**
      * Tạo tài khoản admin mới với validation
      */
-    public boolean registerAdmin(String tenDangNhap, String matKhau, String vaiTro, String maNV) {
+    public String createAdminAccount(String tenDangNhap, String matKhau, String vaiTro, String maNV) {
         // Kiểm tra validation
         if (tenDangNhap == null || tenDangNhap.trim().isEmpty()) {
-            System.out.println("Tên đăng nhập không được để trống!");
-            return false;
+            return "Tên đăng nhập không được để trống!";
         }
         
         if (matKhau == null || matKhau.trim().isEmpty()) {
-            System.out.println("Mật khẩu không được để trống!");
-            return false;
+            return "Mật khẩu không được để trống!";
         }
         
         if (matKhau.length() < 6) {
-            System.out.println("Mật khẩu phải có ít nhất 6 ký tự!");
-            return false;
+            return "Mật khẩu phải có ít nhất 6 ký tự!";
         }
         
         if (isUsernameExists(tenDangNhap)) {
-            System.out.println("Tên đăng nhập đã tồn tại!");
-            return false;
+            return "Tên đăng nhập đã tồn tại!";
         }
         
         TaiKhoanNhanVien taiKhoan = new TaiKhoanNhanVien(tenDangNhap, matKhau, vaiTro, maNV);
-        return dao.createTaiKhoan(taiKhoan);
+        if (dao.createTaiKhoan(taiKhoan)) {
+            return "SUCCESS";
+        } else {
+            return "Lỗi khi tạo tài khoản!";
+        }
     }
 
     /**

@@ -77,6 +77,10 @@ public class KhachHangDAO {
      * Thêm khách hàng mới
      */
     public boolean createKhachHang(KhachHang kh) {
+        if (!isPhoneValid(kh.getSoDienThoai())) {
+            System.out.println("Số điện thoại không hợp lệ.");
+            return false;
+        }
         String sql = "INSERT INTO KhachHang (maKH, tenKH, soDienThoai) VALUES (?, ?, ?)";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -97,6 +101,10 @@ public class KhachHangDAO {
      * Cập nhật thông tin khách hàng
      */
     public boolean updateKhachHang(KhachHang kh) {
+        if (!isPhoneValid(kh.getSoDienThoai())) {
+            System.out.println("Số điện thoại không hợp lệ.");
+            return false;
+        }
         String sql = "UPDATE KhachHang SET tenKH = ?, soDienThoai = ? WHERE maKH = ?";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -157,5 +165,53 @@ public class KhachHangDAO {
             System.out.println("Lỗi tìm kiếm khách hàng: " + e.getMessage());
         }
         return list;
+    }
+
+    /**
+     * Lấy mã khách hàng tiếp theo
+     */
+    public String getNextKhachHangId() {
+        String sql = "SELECT MAX(CAST(SUBSTRING(maKH, 3) AS INT)) as maxNum FROM KhachHang WHERE maKH LIKE 'KH%'";
+        try {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            
+            if (rs.next()) {
+                int maxNum = rs.getInt("maxNum");
+                rs.close();
+                ps.close();
+                
+                if (maxNum > 0) {
+                    return String.format("KH%03d", maxNum + 1);
+                }
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            System.out.println("Lỗi lấy mã khách hàng tiếp theo: " + e.getMessage());
+        }
+        
+        // Nếu lỗi hoặc không có dữ liệu, trả về KH001
+        return "KH001";
+    }
+
+    /**
+     * Kiểm tra xem mã khách hàng có trùng không
+     */
+    public boolean isKhachHangExists(String maKH) {
+        return getKhachHangByMa(maKH) != null;
+    }
+
+    /**
+     * Validate số điện thoại (phải là 10 số)
+     */
+    public static boolean isPhoneValid(String soDienThoai) {
+        if (soDienThoai == null || soDienThoai.trim().isEmpty()) {
+            return false;
+        }
+        // Remove all spaces
+        String phone = soDienThoai.replaceAll("\\s", "");
+        // Check if it's exactly 10 digits and no letters
+        return phone.matches("^\\d{10}$");
     }
 }

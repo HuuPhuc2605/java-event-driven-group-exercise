@@ -141,4 +141,28 @@ public class LoaiPhongDAO {
         }
         return list;
     }
+
+    /**
+     * Kiểm tra xem loại phòng có tồn tại không (by tên)
+     */
+    public boolean isLoaiPhongExistsByName(String tenLoaiPhong) {
+        String sql = "SELECT COUNT(*) as count FROM LoaiPhong WHERE tenLoaiPhong = ?";
+        try {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, tenLoaiPhong);
+            
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                int count = rs.getInt("count");
+                rs.close();
+                ps.close();
+                return count > 0;
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            System.out.println("Lỗi kiểm tra loại phòng: " + e.getMessage());
+        }
+        return false;
+    }
 }

@@ -126,6 +126,27 @@ public class TaiKhoanNhanVienDAO {
     }
 
     /**
+     * Cập nhật toàn bộ thông tin tài khoản
+     */
+    public boolean updateTaiKhoan(TaiKhoanNhanVien taiKhoan) {
+        String sql = "UPDATE TaiKhoanNhanVien SET matKhau = ?, vaiTro = ?, maNV = ? WHERE tenDangNhap = ?";
+        try {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, taiKhoan.getMatKhau());
+            ps.setString(2, taiKhoan.getVaiTro());
+            ps.setString(3, taiKhoan.getMaNV());
+            ps.setString(4, taiKhoan.getTenDangNhap());
+            
+            int result = ps.executeUpdate();
+            ps.close();
+            return result > 0;
+        } catch (SQLException e) {
+            System.out.println("Lỗi cập nhật tài khoản: " + e.getMessage());
+        }
+        return false;
+    }
+
+    /**
      * Xóa tài khoản
      */
     public boolean deleteTaiKhoan(String tenDangNhap) {
@@ -198,5 +219,12 @@ public class TaiKhoanNhanVienDAO {
             System.out.println("Lỗi lấy nhân viên: " + e.getMessage());
         }
         return null;
+    }
+
+    /**
+     * Kiểm tra xem tên đăng nhập có trùng không
+     */
+    public boolean isTenDangNhapExists(String tenDangNhap) {
+        return getTaiKhoanByUsername(tenDangNhap) != null;
     }
 }

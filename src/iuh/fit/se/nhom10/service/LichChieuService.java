@@ -5,6 +5,7 @@ import iuh.fit.se.nhom10.dao.LichChieuDAO;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -28,6 +29,13 @@ public class LichChieuService {
         if (ngayChieu == null) {
             throw new IllegalArgumentException("Ngày chiếu không được trống");
         }
+        
+        LocalDate today = LocalDate.now();
+        LocalDate ngayChieuLocal = ngayChieu.toLocalDate();
+        if (ngayChieuLocal.isBefore(today)) {
+            throw new IllegalArgumentException("Ngày chiếu không được trước ngày hôm nay");
+        }
+        
         if (gioBatDau == null) {
             throw new IllegalArgumentException("Giờ bắt đầu không được trống");
         }
@@ -59,6 +67,13 @@ public class LichChieuService {
         if (ngayChieu == null) {
             throw new IllegalArgumentException("Ngày chiếu không được trống");
         }
+        
+        LocalDate today = LocalDate.now();
+        LocalDate ngayChieuLocal = ngayChieu.toLocalDate();
+        if (ngayChieuLocal.isBefore(today)) {
+            throw new IllegalArgumentException("Ngày chiếu không được trước ngày hôm nay");
+        }
+        
         if (gioBatDau == null) {
             throw new IllegalArgumentException("Giờ bắt đầu không được trống");
         }

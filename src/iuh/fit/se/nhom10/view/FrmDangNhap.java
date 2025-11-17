@@ -4,6 +4,9 @@ import iuh.fit.se.nhom10.model.TaiKhoanNhanVien;
 import iuh.fit.se.nhom10.service.TaiKhoanNhanVienService;
 import iuh.fit.se.nhom10.util.ButtonStyle;
 import iuh.fit.se.nhom10.util.ColorPalette;
+import iuh.fit.se.nhom10.view.admin.FrmAdminMenu;
+import iuh.fit.se.nhom10.view.nhanvien.FrmNhanVienMenu;
+
 
 import javax.swing.*;
 import java.awt.*;
@@ -157,7 +160,7 @@ public class FrmDangNhap extends JFrame {
         pnlContent.add(chkGhiNho);
         pnlContent.add(Box.createVerticalStrut(12));
         pnlContent.add(lblThongBao);
-        pnlContent.add(Box.createVerticalStrut(25));
+        pnlContent.add(Box.createVerticalGlue());
 
         JPanel pnlButtons = new JPanel();
         pnlButtons.setLayout(new BoxLayout(pnlButtons, BoxLayout.X_AXIS));
@@ -326,7 +329,7 @@ public class FrmDangNhap extends JFrame {
             saveCredentials();
             
             // Đăng nhập thành công
-            lblThongBao.setText("✓ Đăng nhập thành công! Chào " + adminHienTai.getNhanVien().getTenNV());
+            lblThongBao.setText("Đăng nhập thành công! Chào " + adminHienTai.getNhanVien().getTenNV());
             lblThongBao.setForeground(ColorPalette.STATUS_SUCCESS);
             
             // Delay một chút rồi mở form chính
@@ -352,9 +355,16 @@ public class FrmDangNhap extends JFrame {
             JOptionPane.INFORMATION_MESSAGE);
         
         try {
-            // Mở form menu admin
-            FrmAdminMenu frmAdminMenu = new FrmAdminMenu(adminHienTai);
-            frmAdminMenu.setVisible(true);
+            String vaiTro = adminHienTai.getVaiTro();
+            if (vaiTro != null && vaiTro.trim().equalsIgnoreCase("nhân viên")) {
+                // If role is employee, open employee menu
+                FrmNhanVienMenu frmNhanVienMenu = new FrmNhanVienMenu(adminHienTai);
+                frmNhanVienMenu.setVisible(true);
+            } else {
+                // Otherwise, open admin menu
+                FrmAdminMenu frmAdminMenu = new FrmAdminMenu(adminHienTai);
+                frmAdminMenu.setVisible(true);
+            }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Lỗi: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
         }

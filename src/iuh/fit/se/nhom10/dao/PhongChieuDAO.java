@@ -167,4 +167,11 @@ public class PhongChieuDAO {
         }
         return 0;
     }
+
+    /**
+     * Kiểm tra xem mã phòng chiếu có trùng không
+     */
+    public boolean isPhongChieuExists(String maPhong) {
+        return getPhongByMa(maPhong) != null;
+    }
 }

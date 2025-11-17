@@ -212,4 +212,24 @@ public class GheNgoiDAO {
         }
         return bookedSeats;
     }
+    public List<String> getBookedSeatsInRoom(String maPhong) {
+        List<String> bookedSeats = new ArrayList<>();
+        String sql = "SELECT DISTINCT v.maGhe FROM VeXemPhim v " +
+                     "JOIN GheNgoi g ON v.maGhe = g.maGhe " +
+                     "WHERE g.maPhong = ?";
+        try {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, maPhong);
+            
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                bookedSeats.add(rs.getString("maGhe"));
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            System.out.println("Lỗi lấy ghế đã đặt trong phòng: " + e.getMessage());
+        }
+        return bookedSeats;
+    }
 }

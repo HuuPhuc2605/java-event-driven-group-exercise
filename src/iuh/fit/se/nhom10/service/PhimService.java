@@ -33,16 +33,16 @@ public class PhimService {
             return "Mã phim không được để trống!";
         }
         
+        if (dao.isPhimExists(phim.getMaPhim())) {
+            return "Mã phim đã tồn tại!";
+        }
+        
         if (phim.getTenPhim() == null || phim.getTenPhim().trim().isEmpty()) {
             return "Tên phim không được để trống!";
         }
         
         if (phim.getThoiLuong() <= 0) {
             return "Thời lượng phim phải lớn hơn 0!";
-        }
-        
-        if (dao.getPhimByMa(phim.getMaPhim()) != null) {
-            return "Mã phim đã tồn tại!";
         }
         
         if (phim.getMaTheLoai() <= 0) {

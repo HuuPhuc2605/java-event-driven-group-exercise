@@ -1,4 +1,4 @@
-package iuh.fit.se.nhom10.view;
+package iuh.fit.se.nhom10.view.admin;
 
 import iuh.fit.se.nhom10.model.TaiKhoanNhanVien;
 import iuh.fit.se.nhom10.model.Phim;
@@ -934,13 +934,11 @@ public class FrmQuanLyPhimPanel extends JPanel {
         JLabel lblThoiLuong = new JLabel("Thời Lượng (phút):");
         lblThoiLuong.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL + 2, Font.BOLD));
         lblThoiLuong.setForeground(ColorPalette.TEXT_LABEL);
-        JTextField txtThoiLuong = new JTextField();
-        txtThoiLuong.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-        txtThoiLuong.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_INPUT + 1, Font.PLAIN));
-        txtThoiLuong.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(ColorPalette.BORDER_INPUT, 1),
-            BorderFactory.createEmptyBorder(8, 10, 8, 10)
-        ));
+        JSpinner spinThoiLuong = new JSpinner(new SpinnerNumberModel(90, 1, 300, 1));
+        spinThoiLuong.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        spinThoiLuong.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_INPUT + 1, Font.PLAIN));
+        JSpinner.NumberEditor editorThoiLuong = new JSpinner.NumberEditor(spinThoiLuong, "###");
+        spinThoiLuong.setEditor(editorThoiLuong);
 
         JLabel lblDaoDien = new JLabel("Đạo Diễn:");
         lblDaoDien.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL + 2, Font.BOLD));
@@ -966,7 +964,7 @@ public class FrmQuanLyPhimPanel extends JPanel {
         if (phim != null) {
             txtMaPhim.setText(phim.getMaPhim());
             txtTenPhim.setText(phim.getTenPhim());
-            txtThoiLuong.setText(String.valueOf(phim.getThoiLuong()));
+            spinThoiLuong.setValue(phim.getThoiLuong());
             try {
                 TheLoai tl = theLoaiDAO.getTheLoaiByMa(phim.getMaTheLoai());
                 DaoDien dd = daoDienDAO.getDaoDienByMa(phim.getMaDD());
@@ -987,7 +985,7 @@ public class FrmQuanLyPhimPanel extends JPanel {
         pnl.add(cboTheLoai);
         pnl.add(Box.createVerticalStrut(12));
         pnl.add(lblThoiLuong);
-        pnl.add(txtThoiLuong);
+        pnl.add(spinThoiLuong);
         pnl.add(Box.createVerticalStrut(12));
         pnl.add(lblDaoDien);
         pnl.add(cboDaoDien);
@@ -1010,7 +1008,7 @@ public class FrmQuanLyPhimPanel extends JPanel {
                 String tenPhim = txtTenPhim.getText().trim();
                 String theLoaiStr = (String) cboTheLoai.getSelectedItem();
                 int maTheLoai = Integer.parseInt(theLoaiStr.split(" - ")[0]);
-                int thoiLuong = Integer.parseInt(txtThoiLuong.getText().trim());
+                int thoiLuong = (Integer) spinThoiLuong.getValue();
                 String daoDienStr = (String) cboDaoDien.getSelectedItem();
                 String maDD = daoDienStr.split(" - ")[0];
 
@@ -1031,7 +1029,7 @@ public class FrmQuanLyPhimPanel extends JPanel {
                     JOptionPane.showMessageDialog(this, result, "Lỗi", JOptionPane.ERROR_MESSAGE);
                 }
             } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(this, "Vui lòng nhập số hợp lệ cho thời lượng!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Vui lòng nhập số hợp lệ!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Lỗi: " + ex.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
@@ -1083,7 +1081,7 @@ public class FrmQuanLyPhimPanel extends JPanel {
             BorderFactory.createEmptyBorder(8, 10, 8, 10)
         ));
 
-        JLabel lblQuocTich = new JLabel("Quốc Tích:");
+        JLabel lblQuocTich = new JLabel("Quốc Tịch:");
         lblQuocTich.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL + 2, Font.BOLD));
         lblQuocTich.setForeground(ColorPalette.TEXT_LABEL);
         JTextField txtQuocTich = new JTextField();
@@ -1126,6 +1124,16 @@ public class FrmQuanLyPhimPanel extends JPanel {
                 String maDD = txtMaDD.getText().trim();
                 String tenDD = txtTenDD.getText().trim();
                 String quocTich = txtQuocTich.getText().trim();
+
+                if (maDD.isEmpty() || tenDD.isEmpty()) {
+                    JOptionPane.showMessageDialog(dialog, "Mã đạo diễn và tên đạo diễn không được để trống!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                if (dd == null && daoDienDAO.isDaoDienExists(maDD)) {
+                    JOptionPane.showMessageDialog(dialog, "Mã đạo diễn '" + maDD + "' đã tồn tại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
 
                 DaoDien newDD = new DaoDien(maDD, tenDD, quocTich);
                 
@@ -1200,6 +1208,11 @@ public class FrmQuanLyPhimPanel extends JPanel {
             try {
                 String tenTheLoai = txtTenTheLoai.getText().trim();
                 
+                if (tenTheLoai.isEmpty()) {
+                    JOptionPane.showMessageDialog(dialog, "Tên thể loại không được để trống!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
                 if (tl == null) {
                     TheLoai newTL = new TheLoai();
                     newTL.setTenTheLoai(tenTheLoai);

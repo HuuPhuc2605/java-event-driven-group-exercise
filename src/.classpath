@@ -2,5 +2,6 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path=""/>
+	<classpathentry kind="src" path="/HTQL_Rap_Chieu_Phim"/>
 	<classpathentry kind="output" path=""/>
 </classpath>

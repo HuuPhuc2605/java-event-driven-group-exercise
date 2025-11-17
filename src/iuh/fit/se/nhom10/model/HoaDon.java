@@ -172,4 +172,24 @@ public class HoaDon {
                 ", maKM='" + maKM + '\'' +
                 '}';
     }
+
+	public Object getThanhTien() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Object getNhanVien() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Object getKhachHang() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Object getChiTietHoaDonList() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

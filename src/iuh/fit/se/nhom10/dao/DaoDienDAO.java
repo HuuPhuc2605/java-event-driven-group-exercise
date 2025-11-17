@@ -24,6 +24,10 @@ public class DaoDienDAO {
      * Thêm đạo diễn mới
      */
     public boolean createDaoDien(DaoDien daoDien) {
+        if (isDaoDienExists(daoDien.getMaDD())) {
+            System.out.println("Đạo diễn đã tồn tại.");
+            return false;
+        }
         String sql = "INSERT INTO DaoDien (maDD, tenDD, quocTich) VALUES (?, ?, ?)";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -137,5 +141,12 @@ public class DaoDienDAO {
             System.out.println("Lỗi lấy danh sách đạo diễn: " + e.getMessage());
         }
         return list;
+    }
+
+    /**
+     * Kiểm tra xem mã đạo diễn có trùng không
+     */
+    public boolean isDaoDienExists(String maDD) {
+        return getDaoDienByMa(maDD) != null;
     }
 }

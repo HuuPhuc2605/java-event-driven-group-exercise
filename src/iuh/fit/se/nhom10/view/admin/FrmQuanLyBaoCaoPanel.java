@@ -1,4 +1,4 @@
-package iuh.fit.se.nhom10.view;
+package iuh.fit.se.nhom10.view.admin;
 
 import iuh.fit.se.nhom10.model.TaiKhoanNhanVien;
 import iuh.fit.se.nhom10.dao.*;
@@ -405,6 +405,22 @@ public class FrmQuanLyBaoCaoPanel extends JPanel {
         header.setBackground(ColorPalette.PRIMARY);
         header.setForeground(Color.WHITE);
         header.setPreferredSize(new Dimension(header.getWidth(), 45));
+        
+        header.setDefaultRenderer(new javax.swing.table.DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, 
+                                                          boolean hasFocus, int row, int column) {
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                setBackground(ColorPalette.PRIMARY);
+                setForeground(Color.WHITE);
+                setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL + 2, Font.BOLD));
+                setHorizontalAlignment(CENTER);
+                setOpaque(true);
+                setBorder(BorderFactory.createEmptyBorder(8, 5, 8, 5));
+                return this;
+            }
+        });
+        
         table.setDefaultRenderer(Object.class, new javax.swing.table.DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, 

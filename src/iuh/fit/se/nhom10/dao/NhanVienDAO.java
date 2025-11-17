@@ -81,6 +81,10 @@ public class NhanVienDAO {
      * Thêm nhân viên mới
      */
     public boolean createNhanVien(NhanVien nv) {
+        if (!isPhoneValid(nv.getSoDienThoai())) {
+            System.out.println("Số điện thoại không hợp lệ.");
+            return false;
+        }
         String sql = "INSERT INTO NhanVien (maNV, tenNV, maChucVu, luong, soDienThoai) VALUES (?, ?, ?, ?, ?)";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -103,6 +107,10 @@ public class NhanVienDAO {
      * Cập nhật thông tin nhân viên
      */
     public boolean updateNhanVien(NhanVien nv) {
+        if (!isPhoneValid(nv.getSoDienThoai())) {
+            System.out.println("Số điện thoại không hợp lệ.");
+            return false;
+        }
         String sql = "UPDATE NhanVien SET tenNV = ?, maChucVu = ?, luong = ?, soDienThoai = ? WHERE maNV = ?";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -166,5 +174,25 @@ public class NhanVienDAO {
             System.out.println("Lỗi tìm kiếm nhân viên: " + e.getMessage());
         }
         return list;
+    }
+
+    /**
+     * Kiểm tra xem mã nhân viên có trùng không
+     */
+    public boolean isNhanVienExists(String maNV) {
+        return getNhanVienByMa(maNV) != null;
+    }
+
+    /**
+     * Validate số điện thoại (phải là 10 số)
+     */
+    public static boolean isPhoneValid(String soDienThoai) {
+        if (soDienThoai == null || soDienThoai.trim().isEmpty()) {
+            return false;
+        }
+        // Remove all spaces
+        String phone = soDienThoai.replaceAll("\\s", "");
+        // Check if it's exactly 10 digits and no letters
+        return phone.matches("^\\d{10}$");
     }
 }

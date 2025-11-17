@@ -286,4 +286,11 @@ public class LichChieuDAO {
         }
         return list;
     }
+
+    /**
+     * Kiểm tra xem mã lịch chiếu có trùng không
+     */
+    public boolean isLichChieuExists(String maLich) {
+        return getLichChieuByMa(maLich) != null;
+    }
 }

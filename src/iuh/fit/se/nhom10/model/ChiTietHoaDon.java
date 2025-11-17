@@ -67,4 +67,24 @@ public class ChiTietHoaDon {
                 ", donGia=" + donGia +
                 '}';
     }
+
+	public int getSoLuong() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	public void setThanhTien(BigDecimal thanhTien) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public ChiTietHoaDon getVeXemPhim() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Object getLichChieu() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

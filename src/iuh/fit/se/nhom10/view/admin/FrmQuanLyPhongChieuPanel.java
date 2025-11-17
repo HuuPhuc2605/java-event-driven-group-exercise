@@ -1,4 +1,4 @@
-package iuh.fit.se.nhom10.view;
+package iuh.fit.se.nhom10.view.admin;
 
 import iuh.fit.se.nhom10.dao.GheNgoiDAO;
 import iuh.fit.se.nhom10.dao.LoaiPhongDAO;
@@ -128,19 +128,43 @@ public class FrmQuanLyPhongChieuPanel extends JPanel {
         pnlSearch.add(lblSearch);
         pnlSearch.add(txtSearchLoaiPhong);
 
-        // Button panel
         JPanel pnlButton = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 5));
         pnlButton.setBackground(ColorPalette.BACKGROUND_CONTENT);
         
-        JButton btnAdd = ButtonStyle.createPrimaryButton("Thêm Loại");
-        btnAdd.setBackground(ColorPalette.BUTTON_SUCCESS_BG);
+        // Thêm Loại button (Green)
+        JButton btnAdd = new JButton("Thêm Loại");
+        btnAdd.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL, Font.BOLD));
+        btnAdd.setForeground(Color.WHITE);
+        btnAdd.setBackground(new Color(76, 175, 80)); // Green color
+        btnAdd.setOpaque(true);
+        btnAdd.setBorderPainted(false);
+        btnAdd.setFocusPainted(false);
+        btnAdd.setPreferredSize(new Dimension(130, 40));
+        btnAdd.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnAdd.addActionListener(e -> addLoaiPhong());
         
-        JButton btnEdit = ButtonStyle.createPrimaryButton("Sửa");
-        btnEdit.setBackground(ColorPalette.PRIMARY);
+        // Sửa button (Blue/Primary)
+        JButton btnEdit = new JButton("Sửa");
+        btnEdit.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL, Font.BOLD));
+        btnEdit.setForeground(Color.WHITE);
+        btnEdit.setBackground(ColorPalette.PRIMARY); // Blue/Teal
+        btnEdit.setOpaque(true);
+        btnEdit.setBorderPainted(false);
+        btnEdit.setFocusPainted(false);
+        btnEdit.setPreferredSize(new Dimension(130, 40));
+        btnEdit.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnEdit.addActionListener(e -> editLoaiPhong());
         
-        JButton btnDelete = ButtonStyle.createDangerButton("Xóa");
+        // Xóa button (Red)
+        JButton btnDelete = new JButton("Xóa");
+        btnDelete.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL, Font.BOLD));
+        btnDelete.setForeground(Color.WHITE);
+        btnDelete.setBackground(new Color(244, 67, 54)); // Red color
+        btnDelete.setOpaque(true);
+        btnDelete.setBorderPainted(false);
+        btnDelete.setFocusPainted(false);
+        btnDelete.setPreferredSize(new Dimension(130, 40));
+        btnDelete.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnDelete.addActionListener(e -> deleteLoaiPhong());
         
         pnlButton.add(btnAdd);
@@ -152,7 +176,6 @@ public class FrmQuanLyPhongChieuPanel extends JPanel {
         pnlSearchButton.add(pnlSearch, BorderLayout.WEST);
         pnlSearchButton.add(pnlButton, BorderLayout.EAST);
 
-        // Table
         String[] columns = {"Mã Loại phòng", "Tên Loại phòng"};
         modelLoaiPhong = new DefaultTableModel(columns, 0) {
             @Override
@@ -162,17 +185,35 @@ public class FrmQuanLyPhongChieuPanel extends JPanel {
         };
         tblLoaiPhong = new JTable(modelLoaiPhong);
         tblLoaiPhong.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL, Font.PLAIN));
-        tblLoaiPhong.setRowHeight(30);
-        tblLoaiPhong.getColumnModel().getColumn(0).setPreferredWidth(100);
-        tblLoaiPhong.getColumnModel().getColumn(1).setPreferredWidth(200);
+        tblLoaiPhong.setRowHeight(35);
+        tblLoaiPhong.setSelectionBackground(new Color(200, 220, 240));
+        tblLoaiPhong.setSelectionForeground(ColorPalette.PRIMARY);
+        tblLoaiPhong.getColumnModel().getColumn(0).setPreferredWidth(120);
+        tblLoaiPhong.getColumnModel().getColumn(1).setPreferredWidth(300);
         
         JTableHeader header = tblLoaiPhong.getTableHeader();
+        header.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL + 1, Font.BOLD));
         header.setBackground(ColorPalette.PRIMARY);
         header.setForeground(Color.WHITE);
-        header.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL, Font.BOLD));
+        header.setPreferredSize(new Dimension(header.getWidth(), 40));
+        
+        header.setDefaultRenderer(new javax.swing.table.DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, 
+                                                          boolean hasFocus, int row, int column) {
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                setBackground(ColorPalette.PRIMARY);
+                setForeground(Color.WHITE);
+                setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL + 1, Font.BOLD));
+                setHorizontalAlignment(CENTER);
+                return this;
+            }
+        });
 
-        JScrollPane scrollPane = new JScrollPane(tblLoaiPhong);
+        JScrollPane scrollPane = new JScrollPane(tblLoaiPhong, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setBackground(ColorPalette.BACKGROUND_CONTENT);
+        scrollPane.getViewport().setBackground(ColorPalette.BACKGROUND_CONTENT);
+        scrollPane.setBorder(BorderFactory.createLineBorder(ColorPalette.BORDER_LIGHT, 1));
 
         pnl.add(pnlSearchButton, BorderLayout.NORTH);
         pnl.add(scrollPane, BorderLayout.CENTER);
@@ -459,64 +500,81 @@ public class FrmQuanLyPhongChieuPanel extends JPanel {
             addPanel.add(btnGenerateSeats);
             pnlSeatMatrix.add(addPanel);
         } else {
+            List<String> bookedSeats = gheNgoiDAO.getBookedSeatsInRoom(selectedRoom);
+            
             java.util.Map<String, List<GheNgoi>> seatsByRow = new java.util.TreeMap<>();
             for (GheNgoi ghe : dsGhe) {
                 seatsByRow.computeIfAbsent(ghe.getHang(), k -> new ArrayList<>()).add(ghe);
             }
 
             // Display screen label
-            JLabel lblScreen = new JLabel("🎬 MÀN HÌNH");
+            JLabel lblScreen = new JLabel("MÀN HÌNH");
             lblScreen.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL + 2, Font.BOLD));
             lblScreen.setForeground(ColorPalette.PRIMARY);
             lblScreen.setAlignmentX(Component.CENTER_ALIGNMENT);
             pnlSeatMatrix.add(lblScreen);
             pnlSeatMatrix.add(Box.createVerticalStrut(15));
 
-            // Display each row with horizontal scroll if many columns
             for (String hang : seatsByRow.keySet()) {
                 List<GheNgoi> rowSeats = seatsByRow.get(hang);
                 rowSeats.sort((a, b) -> Integer.compare(a.getCot(), b.getCot()));
 
-                JPanel seatRowContainer = new JPanel();
-                seatRowContainer.setLayout(new FlowLayout(FlowLayout.LEFT, 6, 6));
-                seatRowContainer.setOpaque(false);
+                // Row container with BoxLayout for better centering
+                JPanel seatRowPanel = new JPanel();
+                seatRowPanel.setLayout(new BoxLayout(seatRowPanel, BoxLayout.X_AXIS));
+                seatRowPanel.setOpaque(false);
+                seatRowPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
+                // Row label
                 JLabel lblRow = new JLabel(hang);
                 lblRow.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL + 1, Font.BOLD));
-                lblRow.setPreferredSize(new Dimension(30, 42));
+                lblRow.setPreferredSize(new Dimension(40, 42));
+                lblRow.setMaximumSize(new Dimension(40, 42));
                 lblRow.setHorizontalAlignment(SwingConstants.CENTER);
                 lblRow.setForeground(ColorPalette.PRIMARY);
-                seatRowContainer.add(lblRow);
-
-                // Calculate total width needed for all seats
-                int totalSeatWidth = rowSeats.size() * 48 + (rowSeats.size() - 1) * 6;
+                seatRowPanel.add(lblRow);
+                
+                seatRowPanel.add(Box.createHorizontalStrut(10));
+                
+                // Container for seats (centered)
+                JPanel seatsContainer = new JPanel();
+                seatsContainer.setLayout(new BoxLayout(seatsContainer, BoxLayout.X_AXIS));
+                seatsContainer.setOpaque(false);
+                seatsContainer.setAlignmentX(Component.CENTER_ALIGNMENT);
                 
                 for (GheNgoi ghe : rowSeats) {
                     JButton btnSeat = new JButton(String.valueOf(ghe.getCot()));
                     btnSeat.setPreferredSize(new Dimension(42, 42));
+                    btnSeat.setMaximumSize(new Dimension(42, 42));
+                    btnSeat.setMinimumSize(new Dimension(42, 42));
                     btnSeat.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_SMALL, Font.BOLD));
-                    btnSeat.setBackground(ColorPalette.SEAT_EMPTY);
-                    btnSeat.setForeground(Color.WHITE);
+                    
+                    if (bookedSeats.contains(ghe.getMaGhe())) {
+                        btnSeat.setBackground(new Color(200, 200, 200)); // Gray for booked seats
+                    } else {
+                        btnSeat.setBackground(ColorPalette.SEAT_EMPTY);  // Green for available seats
+                    }
+                    
+                    btnSeat.setForeground(Color.BLACK);
                     btnSeat.setOpaque(true);
                     btnSeat.setBorderPainted(false);
                     btnSeat.setCursor(new Cursor(Cursor.HAND_CURSOR));
                     btnSeat.setFocusPainted(false);
                     
                     btnSeat.addActionListener(e -> showSeatDialog(ghe));
-                    seatRowContainer.add(btnSeat);
+                    seatsContainer.add(btnSeat);
+                    seatsContainer.add(Box.createHorizontalStrut(6)); // spacing between seats
                 }
-
-                // Set proper preferred size based on actual number of seats to show all columns
-                int containerWidth = Math.max(800, rowSeats.size() * 48 + (rowSeats.size() - 1) * 6 + 40);
-                seatRowContainer.setPreferredSize(new Dimension(containerWidth, 54));
                 
-                JScrollPane rowScroll = new JScrollPane(seatRowContainer, JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-                rowScroll.setOpaque(false);
-                rowScroll.getViewport().setOpaque(false);
-                rowScroll.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 8));
-                rowScroll.setBorder(null);
-                rowScroll.setMaximumSize(new Dimension(Short.MAX_VALUE, 58));
-                pnlSeatMatrix.add(rowScroll);
+                // Add stretch space after seats for centering effect
+                seatsContainer.add(Box.createHorizontalGlue());
+                
+                seatRowPanel.add(seatsContainer);
+                seatRowPanel.add(Box.createHorizontalGlue()); // stretch remaining space
+                seatRowPanel.setPreferredSize(new Dimension(800, 64));
+                seatRowPanel.setMaximumSize(new Dimension(Short.MAX_VALUE, 54));
+                
+                pnlSeatMatrix.add(seatRowPanel);
             }
 
             // Add buttons for manage seats
@@ -553,7 +611,7 @@ public class FrmQuanLyPhongChieuPanel extends JPanel {
         }
 
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Tạo Ma Trận Ghế", true);
-        dialog.setSize(450, 300);
+        dialog.setSize(450, 350);
         dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
 
         JPanel panel = new JPanel();
@@ -771,7 +829,14 @@ public class FrmQuanLyPhongChieuPanel extends JPanel {
             return;
         }
 
-        int maLoaiPhong = (int) modelLoaiPhong.getValueAt(row, 0);
+        Object cellValue = modelLoaiPhong.getValueAt(row, 0);
+        int maLoaiPhong;
+        if (cellValue instanceof Integer) {
+            maLoaiPhong = (Integer) cellValue;
+        } else {
+            maLoaiPhong = Integer.parseInt(cellValue.toString().trim());
+        }
+        
         LoaiPhong lp = loaiPhongDAO.getLoaiPhongByMa(maLoaiPhong);
 
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Sửa Loại Phòng", true);
@@ -814,6 +879,8 @@ public class FrmQuanLyPhongChieuPanel extends JPanel {
         });
 
         JButton btnCancel = ButtonStyle.createSecondaryButton("Hủy");
+        btnCancel.setBackground(ColorPalette.BUTTON_SECONDARY_BG);
+        btnCancel.setForeground(ColorPalette.BUTTON_SECONDARY_TEXT);
         btnCancel.addActionListener(e -> dialog.dispose());
 
         btnPanel.add(btnSave);
@@ -836,7 +903,14 @@ public class FrmQuanLyPhongChieuPanel extends JPanel {
             return;
         }
 
-        int maLoaiPhong = (int) modelLoaiPhong.getValueAt(row, 0);
+        Object cellValue = modelLoaiPhong.getValueAt(row, 0);
+        int maLoaiPhong;
+        if (cellValue instanceof Integer) {
+            maLoaiPhong = (Integer) cellValue;
+        } else {
+            maLoaiPhong = Integer.parseInt(cellValue.toString().trim());
+        }
+        
         int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc chắn muốn xóa?", "Xác nhận", JOptionPane.YES_NO_OPTION);
         
         if (confirm == JOptionPane.YES_OPTION) {
@@ -891,21 +965,30 @@ public class FrmQuanLyPhongChieuPanel extends JPanel {
         btnSave.setFont(ColorPalette.getFont(ColorPalette.FONT_SIZE_LABEL, Font.BOLD));
         btnSave.setForeground(Color.WHITE);
         btnSave.addActionListener(e -> {
-            if (!txtMa.getText().trim().isEmpty() && !txtTen.getText().trim().isEmpty() && cmbLoai.getSelectedItem() != null) {
-                PhongChieu phong = new PhongChieu();
-                phong.setMaPhong(txtMa.getText().trim());
-                phong.setTenPhong(txtTen.getText().trim());
-                phong.setMaLoaiPhong(((LoaiPhong) cmbLoai.getSelectedItem()).getMaLoaiPhong());
-                
-                if (phongChieuDAO.createPhongChieu(phong)) {
-                    JOptionPane.showMessageDialog(dialog, "Thêm phòng thành công!");
-                    loadPhong();
-                    dialog.dispose();
-                } else {
-                    JOptionPane.showMessageDialog(dialog, "Lỗi thêm phòng!");
-                }
+            String maphong = txtMa.getText().trim();
+            String tenphong = txtTen.getText().trim();
+            
+            if (maphong.isEmpty() || tenphong.isEmpty() || cmbLoai.getSelectedItem() == null) {
+                JOptionPane.showMessageDialog(dialog, "Vui lòng điền đầy đủ thông tin!", "Thông báo", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (phongChieuDAO.isPhongChieuExists(maphong)) {
+                JOptionPane.showMessageDialog(dialog, "Mã phòng '" + maphong + "' đã tồn tại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            PhongChieu phong = new PhongChieu();
+            phong.setMaPhong(maphong);
+            phong.setTenPhong(tenphong);
+            phong.setMaLoaiPhong(((LoaiPhong) cmbLoai.getSelectedItem()).getMaLoaiPhong());
+            
+            if (phongChieuDAO.createPhongChieu(phong)) {
+                JOptionPane.showMessageDialog(dialog, "Thêm phòng thành công!");
+                loadPhong();
+                dialog.dispose();
             } else {
-                JOptionPane.showMessageDialog(dialog, "Vui lòng điền đầy đủ thông tin!");
+                JOptionPane.showMessageDialog(dialog, "Lỗi thêm phòng!");
             }
         });
 
@@ -1083,16 +1166,24 @@ public class FrmQuanLyPhongChieuPanel extends JPanel {
         btnSave.addActionListener(e -> {
             String hang = (String) cmbHang.getSelectedItem();
             int cot = (Integer) spnCot.getValue();
-            String maGhe = selectedRoom.trim() + "_" + hang + cot;
             
-            System.out.println("[v0] Creating seat: " + maGhe + " with hang=" + hang + " cot=" + cot + " maPhong=" + selectedRoom);
+            String maPhongTrimmed = selectedRoom.trim();
+            String maGhe = maPhongTrimmed + "_" + hang + cot;
+            
+            System.out.println("[v0] addSeat() - Creating seat: maGhe=" + maGhe + ", hang=" + hang + ", cot=" + cot + ", maPhong=" + maPhongTrimmed);
 
-            GheNgoi ghe = new GheNgoi(maGhe, hang, cot, selectedRoom);
+            GheNgoi ghe = new GheNgoi(maGhe, hang, cot, maPhongTrimmed);
+            
+            System.out.println("[v0] addSeat() - GheNgoi object created: " + ghe.toString());
+            System.out.println("[v0] addSeat() - Calling gheNgoiDAO.createGheNgoi()");
+            
             if (gheNgoiDAO.createGheNgoi(ghe)) {
+                System.out.println("[v0] addSeat() - SUCCESS: Seat created successfully");
                 JOptionPane.showMessageDialog(dialog, "Thêm ghế thành công!");
                 loadSeats(selectedRoom, selectedRoomName);
                 dialog.dispose();
             } else {
+                System.out.println("[v0] addSeat() - FAILED: createGheNgoi returned false");
                 JOptionPane.showMessageDialog(dialog, "Lỗi thêm ghế! Vui lòng kiểm tra thông tin.");
             }
         });

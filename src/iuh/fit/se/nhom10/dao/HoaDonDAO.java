@@ -14,14 +14,18 @@ import java.util.Map;
 public class HoaDonDAO {
     private Connection connection;
 
-    public HoaDonDAO() throws SQLException {
-        this.connection = KetNoi.getInstance().getConnection();
+    private Connection getConnection() throws SQLException {
+        if (connection == null || connection.isClosed()) {
+            connection = KetNoi.getInstance().getConnection();
+        }
+        return connection;
     }
 
     public List<HoaDon> getAllHoaDon() throws SQLException {
+        Connection conn = getConnection();
         List<HoaDon> list = new ArrayList<>();
         String sql = "SELECT * FROM HoaDon ORDER BY ngayLap DESC";
-        try (Statement stmt = connection.createStatement();
+        try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 HoaDon hd = mapResultSetToHoaDon(rs);
@@ -32,8 +36,9 @@ public class HoaDonDAO {
     }
 
     public HoaDon getHoaDonByMa(String maHD) throws SQLException {
+        Connection conn = getConnection();
         String sql = "SELECT * FROM HoaDon WHERE maHD = ?";
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, maHD);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -45,13 +50,14 @@ public class HoaDonDAO {
     }
 
     public List<HoaDon> searchHoaDon(String keyword) throws SQLException {
+        Connection conn = getConnection();
         List<HoaDon> list = new ArrayList<>();
         String sql = "SELECT DISTINCT h.* FROM HoaDon h " +
                     "LEFT JOIN KhachHang k ON h.maKH = k.maKH " +
                     "LEFT JOIN NhanVien n ON h.maNV = n.maNV " +
                     "WHERE h.maHD LIKE ? OR k.tenKH LIKE ? OR n.tenNV LIKE ? " +
                     "ORDER BY h.ngayLap DESC";
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             String searchTerm = "%" + keyword + "%";
             pstmt.setString(1, searchTerm);
             pstmt.setString(2, searchTerm);
@@ -67,8 +73,9 @@ public class HoaDonDAO {
     }
 
     public boolean createHoaDon(HoaDon hoaDon) throws SQLException {
+        Connection conn = getConnection();
         String sql = "INSERT INTO HoaDon (maHD, ngayLap, tongTien, giamGia, thanhToan, maNV, maKH, maKM) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, hoaDon.getMaHD());
             pstmt.setTimestamp(2, Timestamp.valueOf(hoaDon.getNgayLap()));
             pstmt.setBigDecimal(3, hoaDon.getTongTien());
@@ -82,8 +89,9 @@ public class HoaDonDAO {
     }
 
     public boolean updateHoaDon(HoaDon hoaDon) throws SQLException {
+        Connection conn = getConnection();
         String sql = "UPDATE HoaDon SET ngayLap = ?, tongTien = ?, giamGia = ?, thanhToan = ?, maNV = ?, maKH = ?, maKM = ? WHERE maHD = ?";
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setTimestamp(1, Timestamp.valueOf(hoaDon.getNgayLap()));
             pstmt.setBigDecimal(2, hoaDon.getTongTien());
             pstmt.setBigDecimal(3, hoaDon.getGiamGia());
@@ -97,17 +105,19 @@ public class HoaDonDAO {
     }
 
     public boolean deleteHoaDon(String maHD) throws SQLException {
+        Connection conn = getConnection();
         String sql = "DELETE FROM HoaDon WHERE maHD = ?";
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, maHD);
             return pstmt.executeUpdate() > 0;
         }
     }
 
     public List<HoaDon> getHoaDonByDate(LocalDateTime startDate, LocalDateTime endDate) throws SQLException {
+        Connection conn = getConnection();
         List<HoaDon> list = new ArrayList<>();
         String sql = "SELECT * FROM HoaDon WHERE ngayLap BETWEEN ? AND ? ORDER BY ngayLap DESC";
-        try (PreparedStatement pstmt = connection.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setTimestamp(1, Timestamp.valueOf(startDate));
             pstmt.setTimestamp(2, Timestamp.valueOf(endDate));
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -123,7 +133,7 @@ public class HoaDonDAO {
     private HoaDon mapResultSetToHoaDon(ResultSet rs) throws SQLException {
         String maHD = rs.getString("maHD");
         Timestamp timestamp = rs.getTimestamp("ngayLap");
-        LocalDateTime ngayLap = timestamp != null ? timestamp.toLocalDateTime() : null;
+        LocalDateTime ngayLap = timestamp != null ? timestamp.toLocalDateTime() : LocalDateTime.now();
 
         BigDecimal tongTien = rs.getBigDecimal("tongTien");
         BigDecimal giamGia = rs.getBigDecimal("giamGia");
@@ -148,11 +158,12 @@ public class HoaDonDAO {
     }
 
     public Map<java.time.LocalDate, BigDecimal[]> getRevenueByDay() throws SQLException {
+        Connection conn = getConnection();
         Map<java.time.LocalDate, BigDecimal[]> result = new LinkedHashMap<>();
         String sql = "SELECT CAST(ngayLap AS DATE) as ngay, COUNT(*) as soHD, SUM(thanhToan) as tongTien " +
                     "FROM HoaDon WHERE thanhToan IS NOT NULL GROUP BY CAST(ngayLap AS DATE) " +
                     "ORDER BY ngay DESC";
-        try (Statement stmt = connection.createStatement();
+        try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 java.time.LocalDate ngay = rs.getDate("ngay").toLocalDate();
@@ -165,11 +176,12 @@ public class HoaDonDAO {
     }
 
     public Map<String, BigDecimal[]> getRevenueByMonth() throws SQLException {
+        Connection conn = getConnection();
         Map<String, BigDecimal[]> result = new LinkedHashMap<>();
         String sql = "SELECT YEAR(ngayLap) as nam, MONTH(ngayLap) as thang, COUNT(*) as soHD, SUM(thanhToan) as tongTien " +
                     "FROM HoaDon WHERE thanhToan IS NOT NULL GROUP BY YEAR(ngayLap), MONTH(ngayLap) " +
                     "ORDER BY nam DESC, thang DESC";
-        try (Statement stmt = connection.createStatement();
+        try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 String key = "Tháng " + rs.getInt("thang") + "/" + rs.getInt("nam");
@@ -182,10 +194,11 @@ public class HoaDonDAO {
     }
 
     public Map<Integer, BigDecimal[]> getRevenueByYear() throws SQLException {
+        Connection conn = getConnection();
         Map<Integer, BigDecimal[]> result = new LinkedHashMap<>();
         String sql = "SELECT YEAR(ngayLap) as nam, COUNT(*) as soHD, SUM(thanhToan) as tongTien " +
                     "FROM HoaDon WHERE thanhToan IS NOT NULL GROUP BY YEAR(ngayLap) ORDER BY nam DESC";
-        try (Statement stmt = connection.createStatement();
+        try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 int nam = rs.getInt("nam");
@@ -198,13 +211,14 @@ public class HoaDonDAO {
     }
 
     public Map<String, Object[]> getRevenueByFilmWithId() throws SQLException {
+        Connection conn = getConnection();
         Map<String, Object[]> result = new LinkedHashMap<>();
         String sql = "SELECT p.maPhim, p.tenPhim, COUNT(v.maVe) as soVe, SUM(ct.donGia) as doanh " +
                     "FROM Phim p LEFT JOIN LichChieu l ON p.maPhim = l.maPhim " +
                     "LEFT JOIN VeXemPhim v ON l.maLich = v.maLich " +
                     "LEFT JOIN ChiTietHoaDon ct ON v.maVe = ct.maVe " +
                     "GROUP BY p.maPhim, p.tenPhim ORDER BY doanh DESC";
-        try (Statement stmt = connection.createStatement();
+        try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 String filmName = rs.getString("tenPhim");
@@ -218,33 +232,35 @@ public class HoaDonDAO {
     }
 
     public Map<String, BigDecimal[]> getRevenueByFilm() throws SQLException {
+        Connection conn = getConnection();
         Map<String, BigDecimal[]> result = new LinkedHashMap<>();
         String sql = "SELECT p.maPhim, p.tenPhim, COUNT(v.maVe) as soVe, SUM(ct.donGia) as doanh " +
                     "FROM Phim p LEFT JOIN LichChieu l ON p.maPhim = l.maPhim " +
                     "LEFT JOIN VeXemPhim v ON l.maLich = v.maLich " +
                     "LEFT JOIN ChiTietHoaDon ct ON v.maVe = ct.maVe " +
                     "GROUP BY p.maPhim, p.tenPhim ORDER BY doanh DESC";
-        try (Statement stmt = connection.createStatement();
+        try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 String filmName = rs.getString("tenPhim");
                 BigDecimal doanh = rs.getBigDecimal("doanh");
                 BigDecimal soVe = new BigDecimal(rs.getInt("soVe"));
                 String maPhim = rs.getString("maPhim");
-                result.put(filmName, new BigDecimal[]{doanh != null ? doanh : BigDecimal.ZERO, soVe, BigDecimal.valueOf(1)}); // Placeholder for compatibility
+                result.put(filmName, new BigDecimal[]{doanh != null ? doanh : BigDecimal.ZERO, soVe, BigDecimal.valueOf(1)});
             }
         }
         return result;
     }
 
     public Map<String[], BigDecimal[]> getRevenueByScreening() throws SQLException {
+        Connection conn = getConnection();
         Map<String[], BigDecimal[]> result = new LinkedHashMap<>();
         String sql = "SELECT l.maLich, p.tenPhim, l.ngayChieu, l.gioBatDau, COUNT(v.maVe) as soVe, SUM(ct.donGia) as doanh " +
                     "FROM LichChieu l LEFT JOIN Phim p ON l.maPhim = p.maPhim " +
                     "LEFT JOIN VeXemPhim v ON l.maLich = v.maLich " +
                     "LEFT JOIN ChiTietHoaDon ct ON v.maVe = ct.maVe " +
                     "GROUP BY l.maLich, p.tenPhim, l.ngayChieu, l.gioBatDau ORDER BY l.ngayChieu DESC";
-        try (Statement stmt = connection.createStatement();
+        try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 String[] key = {rs.getString("maLich"), rs.getString("tenPhim"), 
@@ -258,11 +274,12 @@ public class HoaDonDAO {
     }
 
     public Map<String, Object[]> getRevenueByEmployeeWithId() throws SQLException {
+        Connection conn = getConnection();
         Map<String, Object[]> result = new LinkedHashMap<>();
         String sql = "SELECT n.maNV, n.tenNV, COUNT(h.maHD) as soHD, SUM(h.thanhToan) as doanh " +
                     "FROM NhanVien n LEFT JOIN HoaDon h ON n.maNV = h.maNV AND h.thanhToan IS NOT NULL " +
                     "GROUP BY n.maNV, n.tenNV ORDER BY doanh DESC";
-        try (Statement stmt = connection.createStatement();
+        try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 String tenNV = rs.getString("tenNV");
@@ -276,31 +293,33 @@ public class HoaDonDAO {
     }
 
     public Map<String, BigDecimal[]> getRevenueByEmployee() throws SQLException {
+        Connection conn = getConnection();
         Map<String, BigDecimal[]> result = new LinkedHashMap<>();
         String sql = "SELECT n.maNV, n.tenNV, COUNT(h.maHD) as soHD, SUM(h.thanhToan) as doanh " +
                     "FROM NhanVien n LEFT JOIN HoaDon h ON n.maNV = h.maNV AND h.thanhToan IS NOT NULL " +
                     "GROUP BY n.maNV, n.tenNV ORDER BY doanh DESC";
-        try (Statement stmt = connection.createStatement();
+        try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 String tenNV = rs.getString("tenNV");
                 BigDecimal doanh = rs.getBigDecimal("doanh");
                 BigDecimal soHD = new BigDecimal(rs.getInt("soHD"));
                 String maNV = rs.getString("maNV");
-                result.put(tenNV, new BigDecimal[]{doanh != null ? doanh : BigDecimal.ZERO, soHD, BigDecimal.valueOf(1)}); // Placeholder for compatibility
+                result.put(tenNV, new BigDecimal[]{doanh != null ? doanh : BigDecimal.ZERO, soHD, BigDecimal.valueOf(1)});
             }
         }
         return result;
     }
 
     public List<Object[]> getTopSellingFilms(int limit) throws SQLException {
+        Connection conn = getConnection();
         List<Object[]> result = new ArrayList<>();
         String sql = "SELECT TOP " + limit + " p.tenPhim, COUNT(v.maVe) as soVe, SUM(ct.donGia) as doanh " +
                     "FROM Phim p LEFT JOIN LichChieu l ON p.maPhim = l.maPhim " +
                     "LEFT JOIN VeXemPhim v ON l.maLich = v.maLich " +
                     "LEFT JOIN ChiTietHoaDon ct ON v.maVe = ct.maVe " +
                     "GROUP BY p.tenPhim ORDER BY soVe DESC";
-        try (Statement stmt = connection.createStatement();
+        try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 result.add(new Object[]{
@@ -314,11 +333,12 @@ public class HoaDonDAO {
     }
 
     public List<Object[]> getTopCustomers() throws SQLException {
+        Connection conn = getConnection();
         List<Object[]> result = new ArrayList<>();
         String sql = "SELECT TOP 10 k.maKH, k.tenKH, COUNT(h.maHD) as soMua, COALESCE(SUM(h.thanhToan), 0) as tongChi, MAX(h.ngayLap) as lanMuaCuoi " +
                     "FROM KhachHang k LEFT JOIN HoaDon h ON k.maKH = h.maKH AND h.thanhToan IS NOT NULL " +
                     "GROUP BY k.maKH, k.tenKH ORDER BY tongChi DESC";
-        try (Statement stmt = connection.createStatement();
+        try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy");
             while (rs.next()) {
@@ -337,11 +357,12 @@ public class HoaDonDAO {
     }
 
     public List<Object[]> getTopPromotions() throws SQLException {
+        Connection conn = getConnection();
         List<Object[]> result = new ArrayList<>();
         String sql = "SELECT TOP 10 km.maKM, km.tenKM, COUNT(h.maHD) as soLan, COALESCE(SUM(h.giamGia), 0) as tongGiam, km.tiLeGiam " +
                     "FROM KhuyenMai km LEFT JOIN HoaDon h ON km.maKM = h.maKM AND h.maKM IS NOT NULL " +
                     "GROUP BY km.maKM, km.tenKM, km.tiLeGiam ORDER BY soLan DESC";
-        try (Statement stmt = connection.createStatement();
+        try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 result.add(new Object[]{
@@ -357,11 +378,12 @@ public class HoaDonDAO {
     }
 
     public Map<String, Object[]> getTicketSalesByDay() throws SQLException {
+        Connection conn = getConnection();
         Map<String, Object[]> result = new LinkedHashMap<>();
         String sql = "SELECT CAST(ngayLap AS DATE) as ngay, COUNT(*) as soVe, COALESCE(SUM(thanhToan), 0) as doanh " +
                     "FROM HoaDon WHERE thanhToan IS NOT NULL GROUP BY CAST(ngayLap AS DATE) " +
                     "ORDER BY ngay DESC";
-        try (Statement stmt = connection.createStatement();
+        try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
                 String ngay = rs.getString("ngay");

@@ -22,6 +22,10 @@ public class KhuyenMaiDAO {
      * Thêm khuyến mãi mới
      */
     public boolean createKhuyenMai(KhuyenMai khuyenMai) {
+        if (isKhuyenMaiExists(khuyenMai.getMaKM())) {
+            System.out.println("Mã khuyến mãi đã tồn tại!");
+            return false;
+        }
         String sql = "INSERT INTO KhuyenMai (maKM, tenKM, moTa, tiLeGiam, ngayBatDau, ngayKetThuc) VALUES (?, ?, ?, ?, ?, ?)";
         try {
             PreparedStatement ps = connection.prepareStatement(sql);
@@ -155,7 +159,6 @@ public class KhuyenMaiDAO {
         }
         return list;
     }
-   
 
     /**
      * Tìm khuyến mãi theo tên
@@ -184,5 +187,12 @@ public class KhuyenMaiDAO {
             System.out.println("Lỗi tìm khuyến mãi: " + e.getMessage());
         }
         return list;
+    }
+
+    /**
+     * Kiểm tra xem mã khuyến mãi có trùng không
+     */
+    public boolean isKhuyenMaiExists(String maKM) {
+        return getKhuyenMaiByMa(maKM) != null;
     }
 }

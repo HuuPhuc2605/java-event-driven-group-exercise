@@ -74,4 +74,14 @@ public class Phim {
                 ", maDD='" + maDD + '\'' +
                 '}';
     }
+
+	public Object getNamPhatHanh() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public Object getTheLoai() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

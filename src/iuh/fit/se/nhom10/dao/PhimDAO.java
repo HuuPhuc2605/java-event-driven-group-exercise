@@ -143,4 +143,40 @@ public class PhimDAO {
         }
         return list;
     }
+
+    /**
+     * Kiểm tra xem mã phim có trùng không
+     */
+    public boolean isPhimExists(String maPhim) {
+        return getPhimByMa(maPhim) != null;
+    }
+
+    /**
+     * Kiểm tra xem mã đạo diễn có trùng không (counts phim using this maDD)
+     */
+    public int getCountPhimByMaDD(String maDD) {
+        String sql = "SELECT COUNT(*) as count FROM Phim WHERE maDD = ?";
+        try {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setString(1, maDD);
+            
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                int count = rs.getInt("count");
+                rs.close();
+                ps.close();
+                return count;
+            }
+            rs.close();
+            ps.close();
+        } catch (SQLException e) {
+            System.out.println("Lỗi kiểm tra mã đạo diễn: " + e.getMessage());
+        }
+        return 0;
+    }
+
+    public List<Phim> searchPhim(String trim) {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

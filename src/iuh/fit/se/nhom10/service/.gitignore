@@ -4,3 +4,10 @@
 /PhimService.class
 /PhongChieuService.class
 /TaiKhoanNhanVienService.class
+/DashboardService.class
+/LichChieuService.class
+/ThanhToanService.class
+/nvHoaDonService.class
+/nvKhachHangService.class
+/nvPhimService.class
+/nvThanhToanService.class

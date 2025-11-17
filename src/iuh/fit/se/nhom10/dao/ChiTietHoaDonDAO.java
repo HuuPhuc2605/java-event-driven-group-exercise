@@ -69,4 +69,14 @@ public class ChiTietHoaDonDAO {
         
         return new ChiTietHoaDon(maHD, maVe, donGia);
     }
+
+	public boolean createChiTietHoaDon(ChiTietHoaDon chiTiet) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	public List<ChiTietHoaDon> getChiTietHoaDonByMaHD(String maHD) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

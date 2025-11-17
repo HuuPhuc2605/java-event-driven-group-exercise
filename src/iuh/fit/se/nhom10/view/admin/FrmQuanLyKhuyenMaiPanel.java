@@ -1,4 +1,4 @@
-package iuh.fit.se.nhom10.view;
+package iuh.fit.se.nhom10.view.admin;
 
 import iuh.fit.se.nhom10.model.TaiKhoanNhanVien;
 import iuh.fit.se.nhom10.model.KhuyenMai;
@@ -431,15 +431,15 @@ public class FrmQuanLyKhuyenMaiPanel extends JPanel {
             double tiLeGiam = km.getTiLeGiam();
             String tiLeGiamStr = String.format("%.0f%%", tiLeGiam);
             int index = -1;
-            for (int i = 0; i < tiLeOptions.length; i++) {
+            for (int i = 0; i < tiLeOptions.length - 1; i++) {  // exclude "Custom" from search
                 if (tiLeOptions[i].equals(tiLeGiamStr)) {
                     index = i;
                     break;
                 }
             }
             if (index == -1) {
-                cboTiLeGiam.setSelectedIndex(tiLeOptions.length - 1); // Select "Custom" option
-                txtMoTa.setText(String.valueOf(tiLeGiam)); // Set custom value in text area
+                cboTiLeGiam.setSelectedItem("Custom"); // Select "Custom" option
+                // Don't override txtMoTa - keep original description
             } else {
                 cboTiLeGiam.setSelectedIndex(index);
             }
@@ -483,7 +483,33 @@ public class FrmQuanLyKhuyenMaiPanel extends JPanel {
                 String tenKM = txtTenKM.getText().trim();
                 String moTa = txtMoTa.getText().trim();
                 String tiLeGiamStr = (String) cboTiLeGiam.getSelectedItem();
-                double tiLeGiam = tiLeGiamStr.equals("Custom") ? Double.parseDouble(txtMoTa.getText().trim()) : Double.parseDouble(tiLeGiamStr.replace("%", "").trim());
+                
+                if (maKM.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Mã khuyến mãi không được để trống!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (tenKM.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Tên khuyến mãi không được để trống!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                // Check for duplicate mã khuyến mãi when adding new
+                if (km == null && khuyenMaiDAO.isKhuyenMaiExists(maKM)) {
+                    JOptionPane.showMessageDialog(this, "Mã khuyến mãi này đã tồn tại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                
+                double tiLeGiam;
+                if ("Custom".equals(tiLeGiamStr)) {
+                    String customValue = (String) cboTiLeGiam.getEditor().getItem();
+                    if (customValue == null || customValue.trim().isEmpty()) {
+                        JOptionPane.showMessageDialog(this, "Vui lòng nhập tỉ lệ giảm!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    tiLeGiam = Double.parseDouble(customValue.replace("%", "").trim());
+                } else {
+                    tiLeGiam = Double.parseDouble(tiLeGiamStr.replace("%", "").trim());
+                }
                 
                 if (tiLeGiam < 0 || tiLeGiam > 100) {
                     JOptionPane.showMessageDialog(this, "Tỉ lệ giảm phải từ 0 đến 100%!", "Lỗi", JOptionPane.ERROR_MESSAGE);
